@@ -1,7 +1,6 @@
 # 議論アプリ
 議論アプリケーションをSpringで改良
 # 作成計画
-行程
 ## step1: Singleton + Factory Method
 **目的**
 ・Bean管理(Sigleton)と生成責務分離(Factory Method)の理解
