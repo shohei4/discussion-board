@@ -1,4 +1,4 @@
-package com.example.discussion_board.model;
+package com.example.discussion_board.domain.model;
 
 public enum Genre {
 	
