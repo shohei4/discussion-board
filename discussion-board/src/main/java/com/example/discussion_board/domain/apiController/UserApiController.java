@@ -1,15 +1,20 @@
 package com.example.discussion_board.domain.apiController;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.example.discussion_board.domain.dto.UserRequest;
 import com.example.discussion_board.domain.dto.UserResponse;
-import com.example.discussion_board.domain.entity.User;
-import com.example.discussion_board.domain.mapper.UserMapper;
 import com.example.discussion_board.domain.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,14 +23,35 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserApiController {
-	
+
 	private final UserService userService;
-	private final UserMapper userMapper;
 	
 	@GetMapping("/users")
 	public ResponseEntity<List<UserResponse>> getAll() {
-		List<User> users = userService.findAllUser();
-		List<UserResponse> responseUsers = userMapper.toResponseList(users);
-		return ResponseEntity.ok(responseUsers);		
+		List<UserResponse> users = userService.findAllUser();
+		return ResponseEntity.ok(users);
+	}
+
+	@GetMapping("/users/{id}")
+	public ResponseEntity<UserResponse> getByIdUser(@PathVariable Long id) {
+		UserResponse user = userService.findByIdUser(id);
+		return ResponseEntity.ok(user);
+	}
+
+	@PostMapping
+	public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
+		UserResponse createdUser = userService.createUser(request);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(createdUser.getId())
+				.toUri();
+
+		return ResponseEntity.created(location).body(createdUser);
+	}
+	
+	@PutMapping("/users/{id}")
+	public ResponseEntity<UserResponse> editUser(@PathVariable Long id, @RequestBody UserRequest request) {
+		UserResponse editUser = userService.editUser(request);		
+		return ResponseEntity.ok(editUser);
 	}
 }

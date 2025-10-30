@@ -1,11 +1,15 @@
 package com.example.discussion_board.domain.service.impl;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.discussion_board.domain.dto.UserRequest;
+import com.example.discussion_board.domain.dto.UserResponse;
 import com.example.discussion_board.domain.entity.User;
+import com.example.discussion_board.domain.mapper.UserMapper;
 import com.example.discussion_board.domain.repository.UserRepository;
 import com.example.discussion_board.domain.service.UserService;
 
@@ -16,50 +20,62 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-	//DI
 	private final UserRepository userRepository;
+	private final UserMapper userMapper;
 
 	@Override
-	public List<User> findAllUser() {
-		// TODO 自動生成されたメソッド・スタブ		 
-		return userRepository.findAll();
+	/** 全件取得 */
+	public List<UserResponse> findAllUser() {
+		List<User> users = userRepository.findAll();
+		return userMapper.toResponseList(users);
 	}
 
 	@Override
-	public User findByIdUser(Long id) {
-		// TODO 自動生成されたメソッド・スタブ
-		return userRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("ユーザーが見つかりません"));
+	/** ID検索 */
+	public UserResponse findByIdUser(Long id) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
+		return userMapper.toResponse(user);
 	}
 
 	@Override
-	public User findByUsernameUser(String username) {
-		// TODO 自動生成されたメソッド・スタブ
-		return userRepository.findByUsername(username)
-				.orElseThrow(() -> new RuntimeException("ユーザーが見つかりません"));
+	/** ユーザー名検索 */
+	public UserResponse findByUsernameUser(String username) {
+		User user = userRepository.findByUsername(username)
+				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
+		;
+		return userMapper.toResponse(user);
 	}
 
 	@Override
-	public User createUser(User user) {
-		// TODO 自動生成されたメソッド・スタブ
-		return userRepository.save(user);
+	/** 登録 */
+	public UserResponse createUser(UserRequest request) {
+		User user = userMapper.toEntity(request);
+		User saved = userRepository.save(user);
+		return userMapper.toResponse(saved);
 	}
 
 	@Override
-	public User editUser(User user) {
-		// TODO 自動生成されたメソッド・スタブ
-		//更新前にユーザー情報がデータベースにあるか確認
-		User existing = userRepository.findById(user.getId())
-				.orElseThrow(() -> new RuntimeException("ユーザーが見つかりません"));
-		existing.setUsername(user.getUsername());
-		existing.setEmail(user.getEmail());
-		
-		return userRepository.save(existing);
+	/** 更新 */
+	public UserResponse editUser(UserRequest request) {
+		User existingUser = userRepository.findById(request.getId())
+				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
+
+		// 更新可能なフィールドだけ反映
+		existingUser.setUsername(request.getUsername());
+		existingUser.setEmail(request.getEmail());
+		if (request.getPassowrd() != null && !request.getPassowrd().isBlank()) {
+			existingUser.setPassword(request.getPassowrd());
+		}
+
+		return userMapper.toResponse(existingUser);
 	}
 
 	@Override
-	public void deleteUser(User user) {
-		// TODO 自動生成されたメソッド・スタブ
+	/** 削除 */
+	public void deleteUser(Long id) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
 		userRepository.delete(user);
 	}
 

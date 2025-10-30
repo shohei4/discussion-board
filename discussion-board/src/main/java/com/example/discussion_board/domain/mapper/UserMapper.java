@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import com.example.discussion_board.domain.dto.UserRequest;
 import com.example.discussion_board.domain.dto.UserResponse;
 import com.example.discussion_board.domain.entity.User;
 
@@ -25,6 +26,10 @@ public class UserMapper {
 		return  users.stream()            //Streamに変換
 					.map(this::toResponse)//かくUserをUserResponse型に変換
 					.collect(Collectors.toList());//Listに戻す
+	}
+	
+	public User toEntity(UserRequest request) {
+		return modelMapper.map(request, User.class);
 	}
 	
 
