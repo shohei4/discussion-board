@@ -1,8 +1,8 @@
 package com.example.discussion_board.domain.factory;
 
-import com.example.discussion_board.domain.dto.GidaiResponse;
-import com.example.discussion_board.domain.dto.UserResponse;
 import com.example.discussion_board.domain.entity.Gidai;
+import com.example.discussion_board.dto.GidaiResponse;
+import com.example.discussion_board.dto.UserResponse;
 
 public class SimpleResponseFactory extends BaseResponseFactory {
 

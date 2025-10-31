@@ -2,8 +2,8 @@ package com.example.discussion_board.domain.service;
 
 import java.util.List;
 
-import com.example.discussion_board.domain.dto.UserRequest;
-import com.example.discussion_board.domain.dto.UserResponse;
+import com.example.discussion_board.dto.UserRequest;
+import com.example.discussion_board.dto.UserResponse;
 
 public interface UserService {
 
