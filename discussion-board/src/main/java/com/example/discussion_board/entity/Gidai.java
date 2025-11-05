@@ -1,8 +1,8 @@
-package com.example.discussion_board.domain.entity;
+package com.example.discussion_board.entity;
 
 import java.time.LocalDateTime;
 
-import com.example.discussion_board.domain.model.Genre;
+import com.example.discussion_board.model.Genre;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

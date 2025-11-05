@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.example.discussion_board.domain.service.UserService;
 import com.example.discussion_board.dto.UserRequest;
 import com.example.discussion_board.dto.UserResponse;
+import com.example.discussion_board.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 

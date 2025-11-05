@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import com.example.discussion_board.domain.entity.User;
 import com.example.discussion_board.dto.UserRequest;
 import com.example.discussion_board.dto.UserResponse;
+import com.example.discussion_board.entity.User;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,4 +1,4 @@
-package com.example.discussion_board.domain.entity;
+package com.example.discussion_board.entity;
 
 import java.time.LocalDateTime;
 

@@ -1,4 +1,4 @@
-package com.example.discussion_board.domain.service.impl;
+package com.example.discussion_board.service.impl;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -6,12 +6,12 @@ import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.discussion_board.domain.entity.User;
-import com.example.discussion_board.domain.repository.UserRepository;
-import com.example.discussion_board.domain.service.UserService;
 import com.example.discussion_board.dto.UserRequest;
 import com.example.discussion_board.dto.UserResponse;
+import com.example.discussion_board.entity.User;
 import com.example.discussion_board.mapper.UserMapper;
+import com.example.discussion_board.repository.UserRepository;
+import com.example.discussion_board.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 

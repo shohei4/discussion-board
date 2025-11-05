@@ -1,4 +1,4 @@
-package com.example.discussion_board.domain.service;
+package com.example.discussion_board.service;
 
 import java.util.List;
 

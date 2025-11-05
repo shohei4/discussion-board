@@ -1,9 +1,9 @@
-package com.example.discussion_board.domain.factory;
+package com.example.discussion_board.factory;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.example.discussion_board.domain.entity.User;
+import com.example.discussion_board.entity.User;
 
 @Component
 public class UserFactory {

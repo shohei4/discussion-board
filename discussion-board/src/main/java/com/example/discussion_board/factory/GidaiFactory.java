@@ -1,10 +1,10 @@
-package com.example.discussion_board.domain.factory;
+package com.example.discussion_board.factory;
 
 import org.springframework.stereotype.Component;
 
-import com.example.discussion_board.domain.entity.Gidai;
-import com.example.discussion_board.domain.entity.User;
-import com.example.discussion_board.domain.model.Genre;
+import com.example.discussion_board.entity.Gidai;
+import com.example.discussion_board.entity.User;
+import com.example.discussion_board.model.Genre;
 
 @Component
 public class GidaiFactory {
