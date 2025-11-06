@@ -64,8 +64,8 @@ public class UserServiceImpl implements UserService {
 		// 更新可能なフィールドだけ反映
 		existingUser.setUsername(request.getUsername());
 		existingUser.setEmail(request.getEmail());
-		if (request.getPassowrd() != null && !request.getPassowrd().isBlank()) {
-			existingUser.setPassword(request.getPassowrd());
+		if (request.getPassword() != null && !request.getPassword().isBlank()) {
+			existingUser.setPassword(request.getPassword());
 		}
 
 		return userMapper.toResponse(existingUser);

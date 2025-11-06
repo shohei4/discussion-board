@@ -26,13 +26,13 @@ public class UserApiController {
 
 	private final UserService userService;
 	
-	@GetMapping("/users")
+	@GetMapping
 	public ResponseEntity<List<UserResponse>> getAll() {
 		List<UserResponse> users = userService.findAllUser();
 		return ResponseEntity.ok(users);
 	}
 
-	@GetMapping("/users/{id}")
+	@GetMapping("/{id}")
 	public ResponseEntity<UserResponse> getByIdUser(@PathVariable Long id) {
 		UserResponse user = userService.findByIdUser(id);
 		return ResponseEntity.ok(user);
@@ -49,7 +49,7 @@ public class UserApiController {
 		return ResponseEntity.created(location).body(createdUser);
 	}
 	
-	@PutMapping("/users/{id}")
+	@PutMapping("/{id}")
 	public ResponseEntity<UserResponse> editUser(@PathVariable Long id, @RequestBody UserRequest request) {
 		UserResponse editUser = userService.editUser(request);		
 		return ResponseEntity.ok(editUser);
