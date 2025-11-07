@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.example.discussion_board.dto.UserRequest;
 import com.example.discussion_board.dto.UserResponse;
+import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.User;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,12 @@ public class UserMapper {
 	public User toEntity(UserRequest request) {
 		return modelMapper.map(request, User.class);
 	}
+	
+	// User Entity → UserSummary DTO（GidaiResponse 用）
+    public UserSummary toSummary(User user) {
+        UserSummary summary = new UserSummary(user.getId(),user.getUsername());
+        return summary;
+    }
 	
 
 }

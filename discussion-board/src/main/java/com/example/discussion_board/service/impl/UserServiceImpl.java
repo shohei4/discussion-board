@@ -3,6 +3,7 @@ package com.example.discussion_board.service.impl;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final UserMapper userMapper;
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	/** 全件取得 */
@@ -51,6 +53,9 @@ public class UserServiceImpl implements UserService {
 	/** 登録 */
 	public UserResponse createUser(UserRequest request) {
 		User user = userMapper.toEntity(request);
+		//パスワードハッシュ化
+		String encodedPassword = passwordEncoder.encode(user.getPassword());
+		user.setPassword(encodedPassword);
 		User saved = userRepository.save(user);
 		return userMapper.toResponse(saved);
 	}

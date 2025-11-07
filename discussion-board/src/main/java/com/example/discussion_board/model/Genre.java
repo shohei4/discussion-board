@@ -21,4 +21,14 @@ public enum Genre {
         return label;
     }
 	
+	// 文字列からEnumを取得するユーティリティ
+    public static Genre fromLabel(String label) {
+        for (Genre g : Genre.values()) {
+            if (g.getLabel().equals(label)) {
+                return g;
+            }
+        }
+        return OTHER; // デフォルト値
+    }
+	
 }
