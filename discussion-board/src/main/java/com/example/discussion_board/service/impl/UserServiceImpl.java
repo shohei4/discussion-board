@@ -33,12 +33,25 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	/** ID検索 */
+	/** ID検索(外部処理用) */
 	public UserResponse findByIdUser(Long id) {
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
 		return userMapper.toResponse(user);
 	}
+	
+	public User findByIdUserEntity(Long id) {
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
+		return user;
+	}
+	
+	@Override
+	public User getUserEntityById(Long id) {
+		// TODO 自動生成されたメソッド・スタブ
+		return null;
+	}
+
 
 	@Override
 	/** ユーザー名検索 */
@@ -84,4 +97,5 @@ public class UserServiceImpl implements UserService {
 		userRepository.delete(user);
 	}
 
+	
 }

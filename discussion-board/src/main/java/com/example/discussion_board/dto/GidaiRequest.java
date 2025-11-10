@@ -14,5 +14,5 @@ public class GidaiRequest {
     private Long id;
     private String gidai;   // 議題名
     private String genre;   // ジャンル
-    private String username;      // 投稿者名（作成者）
+    private Long userId;    // 投稿者ID
 }

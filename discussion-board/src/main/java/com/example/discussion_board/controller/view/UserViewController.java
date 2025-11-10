@@ -1,4 +1,4 @@
-package com.example.discussion_board.controller.view;
+package src.main.java.com.example.discussion_board.controller.view;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

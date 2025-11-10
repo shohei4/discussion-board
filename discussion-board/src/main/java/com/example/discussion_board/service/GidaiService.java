@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.discussion_board.dto.GidaiRequest;
 import com.example.discussion_board.dto.GidaiResponse;
+import com.example.discussion_board.entity.User;
 
 public interface GidaiService {
 	
@@ -25,7 +26,7 @@ public interface GidaiService {
      * @param request 登録用DTO（GidaiRequest）
      * @return 登録後のGidaiResponse
      */
-    GidaiResponse createGidai(GidaiRequest request);
+    GidaiResponse createGidai(GidaiRequest request, User user);
 
     /**
      * 議題を更新

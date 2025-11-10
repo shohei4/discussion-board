@@ -24,13 +24,14 @@ public class SecurityConfig {
 						.requestMatchers(
 								"/login", // ログイン画面
 								"/users/registration", // 登録画面
-								"/api/users/**", 
+								"/api/users/**",
+								"/api/gidai/**",
 								"/css/**", "/js/**", "/images/**")
 						.permitAll()
 						.anyRequest().authenticated())
 				.formLogin(form -> form
 						.loginPage("/login") // ← 独自ログイン画面
-						.defaultSuccessUrl("/users/list", true) // ログイン成功後
+						.defaultSuccessUrl("/gidai/list", true) // ログイン成功後
 						.permitAll())
 	            .logout(logout -> logout
 	                .logoutSuccessUrl("/login?logout")

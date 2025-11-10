@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.discussion_board.dto.GidaiRequest;
 import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.entity.Gidai;
+import com.example.discussion_board.entity.User;
 import com.example.discussion_board.mapper.GidaiMapper;
 import com.example.discussion_board.repository.GidaiRepository;
 import com.example.discussion_board.service.GidaiService;
@@ -26,7 +27,7 @@ public class GidaiServiceImpl implements GidaiService {
 	public List<GidaiResponse> findAllGidai() {
 		// TODO 自動生成されたメソッド・スタブ
 		List<Gidai> gidaiList = repository.findAll();
-		List<GidaiResponse> responseList = mapper.toResponseDtoList(gidaiList);
+		List<GidaiResponse> responseList = mapper.toResponseList(gidaiList);
 		return responseList;
 	}
 
@@ -35,18 +36,16 @@ public class GidaiServiceImpl implements GidaiService {
 		// TODO 自動生成されたメソッド・スタブ
 		Gidai gidai = repository.findById(id)
 				.orElseThrow(() -> new RuntimeException("指定の議題が存在しません"));
-		GidaiResponse response = mapper.toResponseDto(gidai)
+		GidaiResponse response = mapper.toResponse(gidai)
 ;		return response;
 	}
 
 
 	@Override
-	public GidaiResponse createGidai(GidaiRequest request) {
+	public GidaiResponse createGidai(GidaiRequest request, User user) {
 		// TODO 自動生成されたメソッド・スタブ
-		//ユーザーEntityの取得
-		
-		Gidai gidai = mapper.toEntity(request, null)
-		return null;
+		Gidai gidai = mapper.toEntity(request, user);
+		return mapper.toResponse(gidai);
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.discussion_board.dto.UserRequest;
 import com.example.discussion_board.dto.UserResponse;
+import com.example.discussion_board.entity.User;
 
 public interface UserService {
 
@@ -14,11 +15,18 @@ public interface UserService {
 	List<UserResponse> findAllUser();
 
 	/**
-	 * Id検索
+	 * Id検索(外部処理用)
 	 * @param id ユーザーID
 	 * @return UserResponse型
 	 */
 	UserResponse findByIdUser(Long id);
+	
+	/**
+	 * Id検索(内部処理用)
+	 * @param id
+	 * @return UserEntiy
+	 */
+	User getUserEntityById(Long id);
 
 	/**
 	 * ユーザー名検索
