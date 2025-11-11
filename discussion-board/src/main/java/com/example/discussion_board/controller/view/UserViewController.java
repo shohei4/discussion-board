@@ -1,11 +1,8 @@
-package src.main.java.com.example.discussion_board.controller.view;
+package com.example.discussion_board.controller.view;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import com.example.discussion_board.mapper.UserMapper;
-import com.example.discussion_board.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -13,9 +10,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("users")
 @RequiredArgsConstructor
 public class UserViewController {
-	
-	private final UserService userService;
-	private final UserMapper userMapper;
 		
 	@GetMapping("/list")
 	public String showUsers() {

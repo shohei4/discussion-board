@@ -66,11 +66,12 @@ public class UserServiceImpl implements UserService {
 	/** 登録 */
 	public UserResponse createUser(UserRequest request) {
 		User user = userMapper.toEntity(request);
+		user.setUsername(user.getUsername());
 		//パスワードハッシュ化
 		String encodedPassword = passwordEncoder.encode(user.getPassword());
 		user.setPassword(encodedPassword);
-		User saved = userRepository.save(user);
-		return userMapper.toResponse(saved);
+		userRepository.save(user);
+		return userMapper.toResponse(user);
 	}
 
 	@Override

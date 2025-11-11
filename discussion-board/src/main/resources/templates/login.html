@@ -11,7 +11,10 @@
     <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="card shadow p-4" style="width: 100%; max-width: 400px; border-radius: 1rem;">
             <h3 class="text-center mb-4">ログイン</h3>
-
+			
+			<!-- 登録成功メッセージ表示用 -->
+			<div id="success-message" class="alert alert-success d-none text-center" role="alert"></div>
+			
             <!-- ログインエラー時のメッセージ -->
             <div th:if="${param.error}" class="alert alert-danger" role="alert">
                 ユーザー名またはパスワードが間違っています。
@@ -42,6 +45,18 @@
             </div>
         </div>
     </div>
+	
+	<script>
+	    window.addEventListener('DOMContentLoaded', () => {
+	        const message = sessionStorage.getItem('successMessage');
+	        if (message) {
+	            const messageDiv = document.getElementById('success-message');
+	            messageDiv.innerText = message;
+	            messageDiv.classList.remove('d-none'); // 表示する
+	            sessionStorage.removeItem('successMessage'); // 一度表示したら削除
+	        }
+	    });
+	</script>
 
 </body>
 </html>

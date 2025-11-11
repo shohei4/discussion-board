@@ -45,6 +45,7 @@ public class GidaiServiceImpl implements GidaiService {
 	public GidaiResponse createGidai(GidaiRequest request, User user) {
 		// TODO 自動生成されたメソッド・スタブ
 		Gidai gidai = mapper.toEntity(request, user);
+		repository.save(gidai);
 		return mapper.toResponse(gidai);
 	}
 

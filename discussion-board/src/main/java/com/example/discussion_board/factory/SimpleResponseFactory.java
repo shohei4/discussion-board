@@ -1,7 +1,7 @@
 package com.example.discussion_board.factory;
 
 import com.example.discussion_board.dto.GidaiResponse;
-import com.example.discussion_board.dto.UserResponse;
+import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.Gidai;
 
 public class SimpleResponseFactory extends BaseResponseFactory {
@@ -12,10 +12,7 @@ public class SimpleResponseFactory extends BaseResponseFactory {
 				.id(gidai.getId())
 				.gidai(gidai.getGidai())
 				.genre(gidai.getGidai())
-				.user(UserResponse.builder()
-		                .id(gidai.getUser().getId())
-		                .username(gidai.getUser().getUsername())
-		                .build())
+				.userSummary(new UserSummary(gidai.getUser().getId(), gidai.getUser().getUsername()))
 		        .build();
 				
 	}

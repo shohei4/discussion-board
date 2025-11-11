@@ -11,7 +11,6 @@ import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.model.Genre;
-import com.example.discussion_board.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,8 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class GidaiMapper {
 	
 	private final ModelMapper modelMapper;
-	private final UserService userService;
-	private final UserMapper userMapper;
+	
 	/**
 	 * 議題レスポンスDTOへの変換
 	 * @param gidai
