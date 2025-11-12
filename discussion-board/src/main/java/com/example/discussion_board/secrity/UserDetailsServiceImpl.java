@@ -1,4 +1,4 @@
-package com.example.discussion_board.service.impl;
+package com.example.discussion_board.secrity;
 
 import java.util.List;
 
