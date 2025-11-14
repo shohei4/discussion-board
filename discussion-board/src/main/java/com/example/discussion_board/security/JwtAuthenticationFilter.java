@@ -1,4 +1,4 @@
-package com.example.discussion_board.secrity;
+package com.example.discussion_board.security;
 
 import java.io.IOException;
 
@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 		}
 
-		// 🔹 次のフィルターに処理を渡す
+		// 🔹 次のフィルターに処理を渡す(SpringSecurityの標準フィルター)
 		filterChain.doFilter(request, response);
 
 		// ここで特別な処理が必要な場合だけ追加

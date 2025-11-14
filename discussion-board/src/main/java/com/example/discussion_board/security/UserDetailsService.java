@@ -1,4 +1,4 @@
-package com.example.discussion_board.secrity;
+package com.example.discussion_board.security;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

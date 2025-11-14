@@ -2,14 +2,28 @@ package com.example.discussion_board.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.example.discussion_board.security.JwtAuthenticationFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
-
+	
+	/**DI*/
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final UserDetailsService userDetalsService;
+	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -17,28 +31,36 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-				.csrf(csrf -> csrf.disable())
+        http
+            // CSRFは不要（ステートレス）
+            .csrf(csrf -> csrf.disable())
 
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(
-								"/login", // ログイン画面
-								"/users/registration", // 登録画面
-								"/api/users/**",
-								"/api/gidai/**",
-								"/css/**", "/js/**", "/images/**")
-						.permitAll()
-						.anyRequest().authenticated())
-				.formLogin(form -> form
-						.loginPage("/login") // ← 独自ログイン画面
-						.defaultSuccessUrl("/gidai/list", true) // ログイン成功後
-						.permitAll())
-	            .logout(logout -> logout
-	                .logoutSuccessUrl("/login?logout")
-	                .permitAll()
-	            );
+            // セッションを使わない
+            .sessionManagement(session -> 
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
 
-		return http.build();
+            // 認可設定
+            .authorizeHttpRequests(auth -> auth
+                // JWTログインAPIとユーザー登録APIは誰でもアクセス可能
+                .requestMatchers("/api/login", "/api/users/**").permitAll()
+                // その他は認証必須
+                .anyRequest().authenticated()
+            )
+
+            // JWTフィルターをUsernamePasswordAuthenticationFilterの前に追加
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+	
+	//AuthenticationManagerをBean化
+	@Bean
+	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+		return http.getSharedObject(AuthenticationManagerBuilder.class)
+				.userDetailsService(userDetalsService)
+				.passwordEncoder(passwordEncoder())
+				.and()
+				.build();
 	}
-
 }

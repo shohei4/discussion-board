@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.discussion_board.dto.LoginRequest;
 import com.example.discussion_board.dto.LoginResponse;
-import com.example.discussion_board.secrity.JwtTokenProvider;
-import com.example.discussion_board.secrity.UserDetailsService;
+import com.example.discussion_board.security.JwtTokenProvider;
+import com.example.discussion_board.security.UserDetailsService;
 
 import lombok.RequiredArgsConstructor;
 

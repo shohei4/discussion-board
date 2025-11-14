@@ -1,4 +1,4 @@
-package com.example.discussion_board.secrity;
+package com.example.discussion_board.security;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
