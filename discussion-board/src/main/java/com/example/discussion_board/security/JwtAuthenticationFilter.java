@@ -26,6 +26,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			HttpServletRequest request,
 			HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
+		
+		//フィルタ除外処理
+		String path = request.getRequestURI();
+		// API は equals（完全一致）
+		if (path.equals("/api/auth/login")
+		        || path.equals("/api/users")) {
+
+		    filterChain.doFilter(request, response);
+		    return;
+		}
+		
+		// view は startsWith（前方一致）
+		if (path.startsWith("/login")
+		        || path.startsWith("/users/registration")) {
+
+		    filterChain.doFilter(request, response);
+		    return;
+		}
+		
 
 		// ここがあなたの書いたJWT解析・認証部分
 		String header = request.getHeader("Authorization");

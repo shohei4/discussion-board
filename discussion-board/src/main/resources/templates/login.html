@@ -1,62 +1,92 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <title>ログイン</title>
-    <!-- Bootstrap 5 CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<meta charset="UTF-8">
+	<title>ログイン</title>
+	<!-- Bootstrap 5 CDN -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
 
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div class="card shadow p-4" style="width: 100%; max-width: 400px; border-radius: 1rem;">
-            <h3 class="text-center mb-4">ログイン</h3>
-			
+	<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+		<div class="card shadow p-4" style="width: 100%; max-width: 400px; border-radius: 1rem;">
+			<h3 class="text-center mb-4">ログイン</h3>
+
 			<!-- 登録成功メッセージ表示用 -->
 			<div id="success-message" class="alert alert-success d-none text-center" role="alert"></div>
-			
-            <!-- ログインエラー時のメッセージ -->
-            <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                ユーザー名またはパスワードが間違っています。
-            </div>
-            <!-- ログアウト時のメッセージ -->
-            <div th:if="${param.logout}" class="alert alert-success" role="alert">
-                ログアウトしました。
-            </div>
 
-            <form th:action="@{/login}" method="post">
-                <div class="mb-3">
-                    <label for="username" class="form-label">ユーザー名</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="ユーザー名を入力" required>
-                </div>
+			<!-- ログアウト時のメッセージ -->
+			<div th:if="${param.logout}" class="alert alert-success" role="alert">
+				ログアウトしました。
+			</div>
 
-                <div class="mb-3">
-                    <label for="password" class="form-label">パスワード</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="パスワードを入力" required>
-                </div>
+			<form id="login-form">
+				<div id="error-message" class="text-danger mb-3"></div> <!-- ここにエラーを表示 -->
 
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">ログイン</button>
-                </div>
-            </form>
+				<div class="mb-3">
+					<label for="email" class="form-label">メールアドレス</label>
+					<input type="text" class="form-control" id="email" name="email" placeholder="メールアドレスを入力"
+						required>
+				</div>
 
-            <div class="mt-3 text-center">
-                <a th:href="@{/users/registration}">新規登録はこちら</a>
-            </div>
-        </div>
-    </div>
-	
+				<div class="mb-3">
+					<label for="password" class="form-label">パスワード</label>
+					<input type="password" class="form-control" id="password" name="password" placeholder="パスワードを入力"
+						required>
+				</div>
+
+				<div class="d-grid">
+					<button type="submit" class="btn btn-primary">ログイン</button>
+				</div>
+			</form>
+
+			<div class="mt-3 text-center">
+				<a th:href="@{/users/registration}">新規登録はこちら</a>
+			</div>
+		</div>
+	</div>
+
 	<script>
-	    window.addEventListener('DOMContentLoaded', () => {
-	        const message = sessionStorage.getItem('successMessage');
-	        if (message) {
-	            const messageDiv = document.getElementById('success-message');
-	            messageDiv.innerText = message;
-	            messageDiv.classList.remove('d-none'); // 表示する
-	            sessionStorage.removeItem('successMessage'); // 一度表示したら削除
-	        }
-	    });
+		//ログイン認証トークン取得を関数化
+		async function login(email, password) {
+		    const response = await fetch('/api/auth/login', {
+		        method: 'POST',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify({ email, password })
+		    });
+		    if (!response.ok) throw new Error(await response.text());
+		    return response.json(); // { token: "..." }
+		}
+		
+		
+		//ログイン認証処理
+		document.getElementById('login-form').addEventListener('submit', async (e) => {
+		    e.preventDefault();
+		    const errorDiv = document.getElementById('error-message');
+		    errorDiv.innerText = '';
+		
+		    const email = document.getElementById('email').value;
+		    const password = document.getElementById('password').value;
+		
+		    try {
+		        //ログインして JWT を取得
+		        const data = await login(email, password);
+		        const token = data.token;
+		        sessionStorage.setItem('token', token); // 必要に応じて保存
+		
+		        //必要なら別ページへ遷移
+		        window.location.href = '/gidai/list';
+		
+		    } catch (err) {
+		        errorDiv.innerText = err.message;
+		        console.error(err);
+		    }
+		});
+		
 	</script>
 
 </body>
+
 </html>
