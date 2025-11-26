@@ -22,7 +22,12 @@
 
             <div class="mb-3">
                 <label for="genre" class="form-label">ジャンル</label>
-                <input type="text" class="form-control" id="genre" name="genre" placeholder="ジャンルを入力" required>
+				<select id="genre" name="genre" class="form-select">
+				  <option value="" disabled selected>選択してください</option>
+				  <th:block th:each="genre : ${genres}">
+					<option th:value="${genre.label}" th:text="${genre.label}"></option>
+				  </th:block>
+				</select>
             </div>
 
             <!-- 投稿者IDはログインユーザーのIDを非表示で送信 -->
@@ -49,6 +54,8 @@
         };
 
         try {
+			const token = localStorage.getItem('jwt');
+			
             const response = await fetch('/api/gidai', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
