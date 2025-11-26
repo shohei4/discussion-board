@@ -1,0 +1,68 @@
+package com.example.discussion_board.entity;
+
+import java.time.LocalDateTime;
+
+import com.example.discussion_board.model.Genre;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "gidai_items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Gidai {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
+
+	@Column(nullable = false, unique = true, length = 200)
+	private String gidai;
+
+	@Enumerated(EnumType.STRING) // Enum を文字列で DB に保存
+	@Column(nullable = false)
+	private Genre genre;
+
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdAt;
+	
+	@Column
+	private LocalDateTime updatedAt;
+
+	//登録時に日時を自動設定
+	@PrePersist
+	public void onCreate() {
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
+
+	//更新時に自動で日付を設定
+	@PreUpdate
+	public void onUpdate() {
+		this.updatedAt = LocalDateTime.now();
+	}
+}

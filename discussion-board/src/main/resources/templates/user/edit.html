@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>ユーザー更新</title>
+</head>
+<body>
+    <h1>ユーザー更新</h1>
+    <form id="userForm">
+        <label>名前:</label>
+        <input type="text" id="name" name="name" required><br>
+
+        <label>メール:</label>
+        <input type="email" id="email" name="email" required><br>
+
+        <label>パスワード:</label>
+        <input type="password" id="password" name="password"><br>
+
+        <button type="button" onclick="updateUser()">更新</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        const userId = {userId};
+
+        // 初期データを取得してフォームにセット
+        async function loadUser() {
+            const response = await fetch(`/api/users/${userId}`);
+            if(response.ok) {
+                const user = await response.json();
+                document.getElementById('name').value = user.name;
+                document.getElementById('email').value = user.email;
+            }
+        }
+
+        // 更新処理
+        async function updateUser() {
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'PUT', // または PATCH
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if(response.ok) {
+                const result = await response.json();
+                document.getElementById('message').innerText = 
+                    `更新成功: ${result.name} (${result.email})`;
+            } else {
+                document.getElementById('message').innerText = 
+                    `更新に失敗しました: ${response.status}`;
+            }
+        }
+
+        window.onload = loadUser;
+    </script>
+</body>
+</html>
