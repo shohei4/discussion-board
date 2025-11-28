@@ -1,13 +1,14 @@
 package com.example.discussion_board.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-public class LoginResponse {
-	//短期有効なJWT
-	private String accessToken; 
-	//長期有効なランダム文字列
+@NoArgsConstructor
+@Builder
+public class RefreshTokenRequest {
 	private String refreshToken;
 }
