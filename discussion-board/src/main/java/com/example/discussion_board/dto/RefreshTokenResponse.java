@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class RefreshTokenResponse {
+	private String AccessToken;
 	private String refreshToken;
-	private Instant expiresAt;
+	private Instant refreshTokenexpiresAt;
 }

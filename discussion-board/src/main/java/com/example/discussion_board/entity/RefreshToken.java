@@ -43,5 +43,22 @@ public class RefreshToken {
 	private boolean revoked;
 	/** トークンの世代番号(複数トークンの順序管理)*/
 	private int tokenVersion;
+	
+	public boolean isExpired() {
+	    return expiresAt.isBefore(Instant.now());
+	}
+
+	public boolean isUsed() {
+	    return used;
+	}
+
+	public boolean isRevoked() {
+	    return revoked;
+	}
+
+	public boolean isActive() {
+	    return !isExpired() && !isUsed() && !isRevoked();
+	}
+
 
 }

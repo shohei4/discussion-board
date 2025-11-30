@@ -5,10 +5,11 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.discussion_board.entity.RefleshToken;
+import com.example.discussion_board.entity.RefreshToken;
 
-public interface RefreshTokenRepository extends JpaRepository<RefleshToken, Long> {
-	Optional<RefleshToken> findByTokenHash(String tokenHash);
-	List<RefleshToken> findAllByUserId(Long userId);
+public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+	Optional<RefreshToken> findByTokenHash(String tokenHash);
+	List<RefreshToken> findAllByUserId(Long userId);
 	void deleteAllByUserId(Long userId);
 }
+ 
