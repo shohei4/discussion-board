@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "refleshToken")
+@Table(name = "refreshToken_items")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,7 +30,7 @@ public class RefreshToken {
 	private Long id;
 	
 	@ManyToOne
-	@JoinColumn(name = "user_id, nullable = false")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 	
 	private String tokenHash;

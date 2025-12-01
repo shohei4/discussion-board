@@ -1,5 +1,6 @@
 package com.example.discussion_board.security;
 
+import com.example.discussion_board.dto.LoginRequest;
 import com.example.discussion_board.dto.LoginResponse;
 import com.example.discussion_board.dto.RefreshTokenResponse;
 
@@ -10,7 +11,7 @@ public interface AuthService {
 	 * @param password
 	 * @return 
 	 */
-	LoginResponse login(String email, String password);
+	LoginResponse login(LoginRequest loginRequest);
 	
 	RefreshTokenResponse refeshAccessToken(String refreshToken);
 	

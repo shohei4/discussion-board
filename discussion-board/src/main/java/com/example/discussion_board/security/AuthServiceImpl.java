@@ -1,19 +1,19 @@
 package com.example.discussion_board.security;
 
-import java.security.SecureRandom;
-import java.util.UUID;
-
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.discussion_board.dto.LoginRequest;
 import com.example.discussion_board.dto.LoginResponse;
 import com.example.discussion_board.dto.RefreshTokenResponse;
+import com.example.discussion_board.dto.RefreshTokenWithPlain;
 import com.example.discussion_board.entity.RefreshToken;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.repository.RefreshTokenRepository;
 import com.example.discussion_board.repository.UserRepository;
+import com.example.discussion_board.util.HashUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,29 +26,33 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-
-    private final SecureRandom secureRandom = new SecureRandom();
-
+    private final HashUtil hashUtil;
+    
     // -------------------------------------------------------------------------------------
     // ① Login（アクセストークン & リフレッシュトークンの発行）
     // -------------------------------------------------------------------------------------
     @Override
-    public LoginResponse login(String email, String password) {
-        User user = userRepository.findByEmail(email)
+    public LoginResponse login(LoginRequest loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        
+        //ユーザーパスの照合
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid password");
         }
-
+        
+        //アクセストークン発行
         String accessToken = jwtTokenProvider.generateToken(user.getEmail());
 
         // RefreshToken 発行
-        RefreshToken refreshToken = refreshTokenService.createToken(user);
+        RefreshTokenWithPlain refreshTokenWithPlain = refreshTokenService.createToken(user);
+        
+        //RefleshTokenEntity生成
+        RefreshToken refreshToken = refreshTokenWithPlain.entity();
 
         return new LoginResponse(
             accessToken,
-            refreshToken.getPlainToken(),
+            refreshTokenWithPlain.plainToken(),
             refreshToken.getExpiresAt()
         );
     }
@@ -59,17 +63,12 @@ public class AuthServiceImpl implements AuthService {
     // -------------------------------------------------------------------------------------
     @Override
     public RefreshTokenResponse refeshAccessToken(String refreshTokenPlain) {
-
-        String hashed = hashToken(refreshTokenPlain);
-
+    	
+    	//平文トークンをハッシュ化
+    	String hashed = hashUtil.sha256Base64(refreshTokenPlain);
+        
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hashed)
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
-
-        // トークンの有効期限チェック
-        if (stored.isExpired()) {
-            refreshTokenRepository.delete(stored);
-            throw new RuntimeException("Refresh token expired");
-        }
 
         // ユーザー取得
         User user = userRepository.findById(stored.getUser().getId())
@@ -79,31 +78,22 @@ public class AuthServiceImpl implements AuthService {
         String newAccessToken = jwtTokenProvider.generateToken(user.getEmail());
 
         // 新しい refreshToken も発行（安全のためローテーション）
-        String newPlainToken = UUID.randomUUID().toString();
-        String newHashedToken = hashToken(newPlainToken);
+        RefreshTokenWithPlain newRefreshTokenWithPlain = refreshTokenService.rotateToken(stored);
+        RefreshToken newRefreshTokenEntity = newRefreshTokenWithPlain.entity();
+       
+        refreshTokenRepository.save(newRefreshTokenEntity);
 
-        stored.setTokenHash(newHashedToken);
-        stored.setExpiresAt(jwtTokenProvider.getRefreshTokenExpiry());
-        refreshTokenRepository.save(stored);
-
-        return new RefreshTokenResponse(newAccessToken, newPlainToken);
+        return new RefreshTokenResponse(newAccessToken, newRefreshTokenWithPlain.plainToken(), newRefreshTokenEntity.getExpiresAt());
     }
 
     // -------------------------------------------------------------------------------------
     // ③ Logout（RefreshToken を失効）
     // -------------------------------------------------------------------------------------
     @Override
-    public void logout(String refreshTokenPlain) {
-        String hashed = hashToken(refreshTokenPlain);
+    public void logout(String plainRefreshToken) {
+        RefreshToken token = refreshTokenService.verifyRefreshToken(plainRefreshToken);
 
-        refreshTokenRepository.findByTokenHash(hashed)
-                .ifPresent(refreshTokenRepository::delete);
-    }
-
-    // -------------------------------------------------------------------------------------
-    // ④ Token ハッシュ化（平文 refresh token は DB に保存しない）
-    // -------------------------------------------------------------------------------------
-    private String hashToken(String token) {
-        return passwordEncoder.encode(token); // ハッシュ化（BCryptなど）
+        token.setRevoked(true);
+        refreshTokenRepository.save(token);
     }
 }

@@ -1,5 +1,7 @@
 package com.example.discussion_board.dto;
 
+import java.time.Instant;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,6 +10,8 @@ import lombok.Data;
 public class LoginResponse {
 	//短期有効なJWT
 	private String accessToken; 
-	//長期有効なランダム文字列
-	private String refreshToken;
+	//平文トークン
+	private String plainRefleshToken;
+	//リフレッシュトークンの期限
+	private Instant refreshTokenExpiresAt;
 }

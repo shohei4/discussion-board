@@ -20,8 +20,6 @@ import lombok.RequiredArgsConstructor;
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 	
 	private final RefreshTokenRepository refreshTokenRepository;
-	private final RefreshToken refreshToken;
-	private final RefreshTokenWithPlain refreshTokenWithPlain;
 	
 
 	 // RefreshToken を生成して保存
@@ -75,7 +73,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public RefreshTokenWithPlain rotateToken(RefreshToken oldToken) {
     	
-    	//1.古いトークンをuserd=trueにして保存
+    	//1.古いトークンをuserd=trueにして保存(悪用時に原因を追えるように削除はしない)
         oldToken.setUsed(true);
         refreshTokenRepository.save(oldToken);
         
@@ -108,7 +106,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshTokenRepository.saveAll(tokens);
     }
 
-    private String hash(String input) {
+    //ハッシュ化メソッド
+    public String hash(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));

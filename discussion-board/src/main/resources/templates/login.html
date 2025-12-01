@@ -27,8 +27,7 @@
 
 				<div class="mb-3">
 					<label for="email" class="form-label">メールアドレス</label>
-					<input type="text" class="form-control" id="email" name="email" placeholder="メールアドレスを入力"
-						required>
+					<input type="text" class="form-control" id="email" name="email" placeholder="メールアドレスを入力" required>
 				</div>
 
 				<div class="mb-3">
@@ -51,40 +50,47 @@
 	<script>
 		//ログイン認証トークン取得を関数化
 		async function login(email, password) {
-		    const response = await fetch('/api/auth/login', {
-		        method: 'POST',
-		        headers: { 'Content-Type': 'application/json' },
-		        body: JSON.stringify({ email, password })
-		    });
-		    if (!response.ok) throw new Error(await response.text());
-		    return response.json(); // { token: "..." }
+			const response = await fetch('/api/auth/login', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({email, password})
+			});
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => null);
+				throw new Error(errorData?.error || await response.text());
+			}
+
+			return response.json();// { accessToken, refreshToken, refreshTokenExpiresAt }
 		}
-		
-		
+
+
 		//ログイン認証処理
 		document.getElementById('login-form').addEventListener('submit', async (e) => {
-		    e.preventDefault();
-		    const errorDiv = document.getElementById('error-message');
-		    errorDiv.innerText = '';
-		
-		    const email = document.getElementById('email').value;
-		    const password = document.getElementById('password').value;
-		
-		    try {
-		        //ログインして JWT を取得
-		        const data = await login(email, password);
-		        const token = data.token;
-		        sessionStorage.setItem('token', token); // 必要に応じて保存
-		
-		        //必要なら別ページへ遷移
-		        window.location.href = '/view/gidai/list';
-		
-		    } catch (err) {
-		        errorDiv.innerText = err.message;
-		        console.error(err);
-		    }
+			e.preventDefault();
+			const errorDiv = document.getElementById('error-message');
+			errorDiv.innerText = '';
+
+			const email = document.getElementById('email').value;
+			const password = document.getElementById('password').value;
+
+			try {
+				//ログインして JWT を取得
+				const data = await login(email, password);
+
+				//JWTとRefreshTokenを保存
+				sessionStorage.setItem('accessToken', data.accessToken);
+				sessionStorage.setItem('refreshToken', data.refreshToken);
+				sessionStorage.setItem('refreshTokenExpiresAt', data.refreshTokenExpiresAt);
+
+				//必要なら別ページへ遷移
+				window.location.href = '/view/gidai/list';
+
+			} catch (err) {
+				errorDiv.innerText = err.message;
+				console.error(err);
+			}
 		});
-		
+
 	</script>
 
 </body>
