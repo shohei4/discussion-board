@@ -4,6 +4,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.discussion_board.dto.LoginRequest;
 import com.example.discussion_board.dto.LoginResponse;
@@ -18,6 +19,7 @@ import com.example.discussion_board.util.HashUtil;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 

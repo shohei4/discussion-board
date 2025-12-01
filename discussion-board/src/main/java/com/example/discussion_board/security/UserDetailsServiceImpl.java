@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.repository.UserRepository;
@@ -13,6 +14,7 @@ import com.example.discussion_board.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 

@@ -9,6 +9,9 @@ import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.discussion_board.dto.RefreshTokenWithPlain;
 import com.example.discussion_board.entity.RefreshToken;
 import com.example.discussion_board.entity.User;
@@ -16,6 +19,8 @@ import com.example.discussion_board.repository.RefreshTokenRepository;
 
 import lombok.RequiredArgsConstructor;
 
+@Service
+@Transactional
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 	

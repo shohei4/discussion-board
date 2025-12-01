@@ -2,11 +2,10 @@ package com.example.discussion_board.entity;
 
 import java.time.Instant;
 
-import org.springframework.data.annotation.Id;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -17,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "refreshToken_items")
+@Table(name = "refresh_token")
 @Getter
 @Setter
 @NoArgsConstructor
