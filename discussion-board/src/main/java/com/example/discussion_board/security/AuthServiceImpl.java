@@ -1,17 +1,16 @@
 package com.example.discussion_board.security;
 
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.discussion_board.dto.LoginRequest;
 import com.example.discussion_board.dto.LoginResponse;
 import com.example.discussion_board.dto.RefreshTokenResponse;
 import com.example.discussion_board.dto.RefreshTokenWithPlain;
 import com.example.discussion_board.entity.RefreshToken;
 import com.example.discussion_board.entity.User;
+import com.example.discussion_board.exception.AuthException;
 import com.example.discussion_board.repository.RefreshTokenRepository;
 import com.example.discussion_board.repository.UserRepository;
 import com.example.discussion_board.util.HashUtil;
@@ -34,13 +33,14 @@ public class AuthServiceImpl implements AuthService {
     // ① Login（アクセストークン & リフレッシュトークンの発行）
     // -------------------------------------------------------------------------------------
     @Override
-    public LoginResponse login(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail())
+    public LoginResponse login(String email, String password) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         
         //ユーザーパスの照合
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid password");
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new AuthException(
+                    "invalid_credentials", "メールアドレスまたはパスワードが違います");
         }
         
         //アクセストークン発行
@@ -64,17 +64,17 @@ public class AuthServiceImpl implements AuthService {
     // ② Refresh（リフレッシュトークンからアクセストークン再発行）
     // -------------------------------------------------------------------------------------
     @Override
-    public RefreshTokenResponse refeshAccessToken(String refreshTokenPlain) {
+    public RefreshTokenResponse refreshAccessToken(String refreshTokenPlain) {
     	
     	//平文トークンをハッシュ化
     	String hashed = hashUtil.sha256Base64(refreshTokenPlain);
         
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hashed)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() -> new AuthException("invalid_token", "リフレッシュトークンが無効です"));
 
         // ユーザー取得
         User user = userRepository.findById(stored.getUser().getId())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new AuthException("user_not_found", "ユーザーが存在しません"));
 
         // 新しいアクセストークンを生成
         String newAccessToken = jwtTokenProvider.generateToken(user.getEmail());
@@ -92,8 +92,8 @@ public class AuthServiceImpl implements AuthService {
     // ③ Logout（RefreshToken を失効）
     // -------------------------------------------------------------------------------------
     @Override
-    public void logout(String plainRefreshToken) {
-        RefreshToken token = refreshTokenService.verifyRefreshToken(plainRefreshToken);
+    public void logout(String plainToken) {
+        RefreshToken token = refreshTokenService.verifyRefreshToken(plainToken);
 
         token.setRevoked(true);
         refreshTokenRepository.save(token);

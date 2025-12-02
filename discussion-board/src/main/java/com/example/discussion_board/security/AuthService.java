@@ -1,6 +1,5 @@
 package com.example.discussion_board.security;
 
-import com.example.discussion_board.dto.LoginRequest;
 import com.example.discussion_board.dto.LoginResponse;
 import com.example.discussion_board.dto.RefreshTokenResponse;
 
@@ -11,9 +10,18 @@ public interface AuthService {
 	 * @param password
 	 * @return 
 	 */
-	LoginResponse login(LoginRequest loginRequest);
+	LoginResponse login(String Email, String password);
 	
-	RefreshTokenResponse refeshAccessToken(String refreshToken);
+	/**
+	 * 再発行処理
+	 * @param refreshToken
+	 * @return　RefreshTokenResponse(accessToken, plainRefreshToekn, refreshTokenexpiresAt)
+	 */
+	RefreshTokenResponse refreshAccessToken(String refreshToken);
 	
-	void logout(String refreshToken);
+	/**
+	 * ログアウト処理（特定のリフレッシュトークンを無効にする）
+	 * @param plainToken
+	 */
+	void logout(String plainToken);
 }

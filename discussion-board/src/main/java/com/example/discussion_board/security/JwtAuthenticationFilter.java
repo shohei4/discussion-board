@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,50 +24,75 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final UserDetailsService userDetailsService;
 
-	protected void doFilterInternal(
-			HttpServletRequest request,
-			HttpServletResponse response,
-			FilterChain filterChain) throws ServletException, IOException {
-		
-		//フィルタ除外処理(filterの動作処理を軽くする為)
-		String path = request.getRequestURI();
-		// API は equals（完全一致）
-		if (path.equals("/api/auth/login")
-		        || path.equals("/api/users")) {
+	 @Override
+	    protected void doFilterInternal(
+	            HttpServletRequest request,
+	            HttpServletResponse response,
+	            FilterChain filterChain) throws ServletException, IOException {
 
-		    filterChain.doFilter(request, response);
-		    return;
-		}
-		
-		// view は startsWith（前方一致）
-		if (path.startsWith("/view/")) {
-		    filterChain.doFilter(request, response);
-		    return; // JWT解析スキップ
-		}
-		
+	        // ---------------------------
+	        // ① フィルタ除外 (軽量化)
+	        // ---------------------------
+	        String path = request.getRequestURI();
+	        if (path.equals("/api/auth/login") || path.equals("/api/users") || path.startsWith("/view/")) {
+	            filterChain.doFilter(request, response);
+	            return;
+	        }
 
-		// ここがあなたの書いたJWT解析・認証部分
-		String header = request.getHeader("Authorization");
-		if (header != null && header.startsWith("Bearer ")) {
-			String token = header.substring(7);
-			
-			String email = jwtTokenProvider.extractEmail(token);
-			
-			if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-				//tokenから取得したemailから特定のユーザーを取得
-				UserDetails user = userDetailsService.loadUserByUsername(email);
-				//tokenと取得したユーザーのemailが同じか判定
-				if (jwtTokenProvider.validateToken(token, user.getUsername())) {
-					SecurityContextHolder.getContext().setAuthentication(
-							new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
-				}
-			}
-		}
+	        // ---------------------------
+	        // ② Authorization ヘッダから token 取得
+	        // ---------------------------
+	        String header = request.getHeader("Authorization");
+	        if (header == null || !header.startsWith("Bearer ")) {
+	            sendUnauthorized(response, "missing_token", "アクセストークンがありません");
+	            return;
+	        }
 
-		// 🔹 次のフィルターに処理を渡す(SpringSecurityの標準フィルター)
-		filterChain.doFilter(request, response);
+	        String token = header.substring(7);
 
-		// ここで特別な処理が必要な場合だけ追加
-		// 例：レスポンスヘッダを加工したいときなど
-	}
+	        try {
+	            // ---------------------------
+	            // ③ Token の署名と期限を検証
+	            // ---------------------------
+	            String email = jwtTokenProvider.extractEmail(token);
+	            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+	                // ---------------------------
+	                // ④ UserDetails を取得
+	                // ---------------------------
+	                UserDetails user = userDetailsService.loadUserByUsername(email);
+
+	                // ---------------------------
+	                // ⑤ Token とユーザーの照合
+	                // ---------------------------
+	                if (jwtTokenProvider.validateToken(token, user.getUsername())) {
+	                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+	                            user, null, user.getAuthorities());
+	                    SecurityContextHolder.getContext().setAuthentication(auth);
+	                }
+	            }
+
+	        } catch (ExpiredJwtException e) {
+	            sendUnauthorized(response, "access_token_expired", "アクセストークンの期限が切れています");
+	            return;
+
+	        } catch (JwtException e) {
+	            sendUnauthorized(response, "invalid_token", "トークンが不正です");
+	            return;
+	        }
+
+	        // ---------------------------
+	        // ⑥ 次のフィルタへ
+	        // ---------------------------
+	        filterChain.doFilter(request, response);
+	    }
+
+	    // ---------------------------
+	    // 共通 401 返却メソッド
+	    // ---------------------------
+	    private void sendUnauthorized(HttpServletResponse response, String error, String message) throws IOException {
+	        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	        response.setContentType("application/json;charset=UTF-8");
+	        response.getWriter().write(String.format("{\"error\":\"%s\",\"message\":\"%s\"}", error, message));
+	    }
 }
