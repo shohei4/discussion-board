@@ -27,7 +27,6 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-    private final HashUtil hashUtil;
     
     // -------------------------------------------------------------------------------------
     // ① Login（アクセストークン & リフレッシュトークンの発行）
@@ -67,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
     public RefreshTokenResponse refreshAccessToken(String refreshTokenPlain) {
     	
     	//平文トークンをハッシュ化
-    	String hashed = hashUtil.sha256Base64(refreshTokenPlain);
+    	String hashed = HashUtil.sha256Base64(refreshTokenPlain);
         
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hashed)
                 .orElseThrow(() -> new AuthException("invalid_token", "リフレッシュトークンが無効です"));

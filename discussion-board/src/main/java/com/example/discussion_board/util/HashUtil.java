@@ -7,7 +7,7 @@ import java.util.Base64;
 
 public class HashUtil {
 
-	public String sha256Base64(String input) {
+	public static String sha256Base64(String input) {
 		try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] bytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));

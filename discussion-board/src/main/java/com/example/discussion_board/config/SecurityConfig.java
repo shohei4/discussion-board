@@ -2,11 +2,9 @@ package com.example.discussion_board.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,10 +26,11 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
+	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        
+		http
             // CSRFは不要（ステートレス）
             .csrf(csrf -> csrf.disable())
 
@@ -41,19 +40,20 @@ public class SecurityConfig {
             )
 
             // 認可設定
-            .authorizeHttpRequests(auth -> auth
-                // JWTログインAPI→POSTのみ許可
-                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                //ユーザ―新規登録→POSTのみ許可
-                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                //viewはログイン画面とユーザー登録画面を許可
-                .requestMatchers("/view/**").permitAll()
-                // その他は認証必須
-                .anyRequest().authenticated()
-            )
+            .authorizeHttpRequests(auth -> {
+                for (PermitPath p : PermitPath.defaultPermitPaths()) {
+                    if (p.method() != null) {
+                        auth.requestMatchers(p.method(), p.path() + "**").permitAll();
+                    } else {
+                        auth.requestMatchers(p.path() + "**").permitAll();
+                    }
+                }
+                auth.anyRequest().authenticated();
+            })
             
             .formLogin(form -> form
                     .loginPage("/view/login") // ← ここでカスタムログインページを指定
+                    .loginProcessingUrl("/api/auth/login") 
                     .permitAll()
                 )
 
@@ -69,15 +69,4 @@ public class SecurityConfig {
 		return config.getAuthenticationManager();
 	}
 	
-	//静的リソースを含むリクエストをJwt認証フィルターから除外
-	@Bean
-	public WebSecurityCustomizer webSecurityCustomizer() {
-	    return web -> web.ignoring().requestMatchers(
-	        "/favicon.ico",
-	        "/css/**",
-	        "/js/**",
-	        "/images/**"
-	    );
-	}
-
 }

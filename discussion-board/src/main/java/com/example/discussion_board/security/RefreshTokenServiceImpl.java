@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final HashUtil hashUtil;
 
     // -------------------------------------------------------------------------------------
     // ① RefreshToken を生成して保存
@@ -34,7 +33,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         String plain = UUID.randomUUID().toString();
 
         // 2. ハッシュ化
-        String hashed = hashUtil.sha256Base64(plain);
+        String hashed = HashUtil.sha256Base64(plain);
 
         // 3. RefreshToken エンティティ生成
         RefreshToken token = RefreshToken.builder()
@@ -62,7 +61,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // -------------------------------------------------------------------------------------
     @Override
     public RefreshToken verifyRefreshToken(String plainToken) {
-        String hashed = hashUtil.sha256Base64(plainToken);
+        String hashed = HashUtil.sha256Base64(plainToken);
 
         RefreshToken token = refreshTokenRepository.findByTokenHash(hashed)
                 .orElseThrow(() -> new AuthException("invalid_token", "リフレッシュトークンが無効です"));
@@ -99,7 +98,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     // -------------------------------------------------------------------------------------
     @Override
     public void revokeToken(String plainToken) {
-        String hashed = hashUtil.sha256Base64(plainToken);
+        String hashed = HashUtil.sha256Base64(plainToken);
 
         RefreshToken token = refreshTokenRepository.findByTokenHash(hashed)
                 .orElseThrow(() -> new AuthException("invalid_token", "リフレッシュトークンが存在しません"));

@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.example.discussion_board.config.PermitPath;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -29,12 +31,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	            HttpServletRequest request,
 	            HttpServletResponse response,
 	            FilterChain filterChain) throws ServletException, IOException {
-
+		 
 	        // ---------------------------
 	        // ① フィルタ除外 (軽量化)
 	        // ---------------------------
-	        String path = request.getRequestURI();
-	        if (path.equals("/api/auth/login") || path.equals("/api/users") || path.startsWith("/view/")) {
+	        String path = request.getServletPath();
+	        String method = request.getMethod();
+	        //permitAllのバスはスキップ
+	        boolean excluded = PermitPath.defaultPermitPaths()
+	        		.stream()
+	        		.anyMatch(p -> p.matches(path, method));
+	        if (excluded) {
 	            filterChain.doFilter(request, response);
 	            return;
 	        }
