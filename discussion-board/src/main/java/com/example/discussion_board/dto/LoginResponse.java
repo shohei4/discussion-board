@@ -11,7 +11,7 @@ public class LoginResponse {
 	//短期有効なJWT
 	private String accessToken; 
 	//平文トークン
-	private String plainRefleshToken;
+	private String plainRefreshToken;
 	//リフレッシュトークンの期限
 	private Instant refreshTokenExpiresAt;
 }

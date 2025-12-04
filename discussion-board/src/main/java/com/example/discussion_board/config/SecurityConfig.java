@@ -33,7 +33,10 @@ public class SecurityConfig {
 		http
             // CSRFは不要（ステートレス）
             .csrf(csrf -> csrf.disable())
-
+            
+            //フォーム認証を無効化
+            .formLogin(form -> form.disable())
+            
             // セッションを使わない
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -51,11 +54,8 @@ public class SecurityConfig {
                 auth.anyRequest().authenticated();
             })
             
-            .formLogin(form -> form
-                    .loginPage("/view/login") // ← ここでカスタムログインページを指定
-                    .loginProcessingUrl("/api/auth/login") 
-                    .permitAll()
-                )
+            
+
 
             // JWTフィルターをUsernamePasswordAuthenticationFilterの前に追加
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

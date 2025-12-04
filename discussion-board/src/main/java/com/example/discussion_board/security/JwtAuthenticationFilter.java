@@ -13,13 +13,18 @@ import com.example.discussion_board.config.PermitPath;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -80,10 +85,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	            }
 
 	        } catch (ExpiredJwtException e) {
+	            log.warn("JWT expired: {}", e.getMessage());
 	            sendUnauthorized(response, "access_token_expired", "アクセストークンの期限が切れています");
 	            return;
 
+	        } catch (SignatureException e) {
+	            log.warn("JWT signature invalid: {}", e.getMessage());
+	            sendUnauthorized(response, "invalid_signature", "トークンの署名が不正です");
+	            return;
+
+	        } catch (MalformedJwtException e) {
+	            log.warn("JWT malformed: {}", e.getMessage());
+	            sendUnauthorized(response, "malformed_token", "トークンの形式が不正です");
+	            return;
+
+	        } catch (UnsupportedJwtException e) {
+	            log.warn("JWT unsupported: {}", e.getMessage());
+	            sendUnauthorized(response, "unsupported_token", "サポートされていないトークン形式です");
+	            return;
+
+	        } catch (IllegalArgumentException e) {
+	            log.warn("JWT illegal argument (possibly null): {}", e.getMessage());
+	            sendUnauthorized(response, "invalid_token", "トークンが空か不正です");
+	            return;
+
 	        } catch (JwtException e) {
+	            log.warn("JWT general exception: {}", e.getMessage());
 	            sendUnauthorized(response, "invalid_token", "トークンが不正です");
 	            return;
 	        }

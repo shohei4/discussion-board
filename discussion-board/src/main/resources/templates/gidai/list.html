@@ -45,36 +45,39 @@
 	    const tbody = document.querySelector('#gidaiTable tbody');
 	    if (!tbody) return;
 	
-	    async function fetchWithRefresh(url) {
-	        let accessToken = localStorage.getItem('accessToken');
-	        let res = await fetch(url, {
-	            headers: { 'Authorization': `Bearer ${accessToken}` }
-	        });
-	
-	        if (res.status === 401) {
-	            // アクセストークン切れ → リフレッシュ
-	            const refreshToken = localStorage.getItem('refreshToken');
-	            const refreshRes = await fetch('/api/refresh', {
-	                method: 'POST',
-	                headers: { 'Content-Type': 'application/json' },
-	                body: JSON.stringify({ refreshToken })
-	            });
-	
-	            if (!refreshRes.ok) {
-	                // リフレッシュ失敗 → ログイン画面へ
-	                window.location.href = '/login';
-	                throw new Error('Refresh failed');
-	            }
-	
-	            const data = await refreshRes.json();
-	            localStorage.setItem('accessToken', data.accessToken);
-	            localStorage.setItem('refreshToken', data.refreshToken);
-	
-	            // 再リクエスト
-	            res = await fetch(url, {
-	                headers: { 'Authorization': `Bearer ${data.accessToken}` }
-	            });
-	        }
+		async function fetchWithRefresh(url) {
+		    let accessToken = sessionStorage.getItem('accessToken');
+		    let res = await fetch(url, {
+		        headers: { 'Authorization': `Bearer ${accessToken}` }
+		    });
+		
+		    if (res.status === 401) {
+		        // アクセストークン切れ → リフレッシュ
+		        const refreshToken = sessionStorage.getItem('refreshToken');
+		
+		        const refreshRes = await fetch('/api/refresh', {
+		            method: 'POST',
+		            headers: { 'Content-Type': 'application/json' },
+		            body: JSON.stringify({ plainRefreshToken: refreshToken })
+		        });
+		
+		        if (!refreshRes.ok) {
+		            window.location.href = '/login';
+		            throw new Error('Refresh failed');
+		        }
+		
+		        const data = await refreshRes.json();
+		
+		        // 新しいトークンを保存
+		        sessionStorage.setItem('accessToken', data.accessToken);
+		        sessionStorage.setItem('refreshToken', data.plainRefreshToken);
+		        sessionStorage.setItem('refreshTokenExpiresAt', data.refreshTokenExpiresAt);
+		
+		        // 再リクエスト
+		        res = await fetch(url, {
+		            headers: { 'Authorization': `Bearer ${data.accessToken}` }
+		        });
+		    }
 	
 	        return res.json();
 	    }
