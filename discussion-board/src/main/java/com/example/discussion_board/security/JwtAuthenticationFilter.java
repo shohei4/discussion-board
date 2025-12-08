@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -72,12 +71,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	                // ---------------------------
 	                // ④ UserDetails を取得
 	                // ---------------------------
-	                UserDetails user = userDetailsService.loadUserByUsername(email);
+	                CustomUserDetails user = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
 
 	                // ---------------------------
 	                // ⑤ Token とユーザーの照合
 	                // ---------------------------
-	                if (jwtTokenProvider.validateToken(token, user.getUsername())) {
+	                
+	                //エラー：ここで内部処理に入っていない→引き数にusernameが入っていた
+	                if (jwtTokenProvider.validateToken(token, user.getEmail())) {
 	                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
 	                            user, null, user.getAuthorities());
 	                    SecurityContextHolder.getContext().setAuthentication(auth);

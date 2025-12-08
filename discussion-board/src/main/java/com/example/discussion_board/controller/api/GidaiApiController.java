@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.example.discussion_board.dto.GidaiRequest;
 import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.entity.User;
+import com.example.discussion_board.security.CustomUserDetails;
 import com.example.discussion_board.service.GidaiService;
 import com.example.discussion_board.service.UserService;
 
@@ -34,8 +36,8 @@ public class GidaiApiController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<GidaiResponse> createGidai(@RequestBody GidaiRequest request) {
-		User user = userService.getUserEntityById(request.getUserId());
+	public ResponseEntity<GidaiResponse> createGidai(@RequestBody GidaiRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+		User user = userService.getUserEntityById(userDetails.getId());
 		GidaiResponse createdGidai = gidaiService.createGidai(request, user);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 				.path("{id}")

@@ -10,5 +10,5 @@ public interface UserDetailsService {
      * @return UserDetailsオブジェクト
      * @throws UsernameNotFoundException 指定ユーザーが存在しない場合
      */
-    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+    UserDetails loadUserByUsername(String email) throws UsernameNotFoundException;
 }

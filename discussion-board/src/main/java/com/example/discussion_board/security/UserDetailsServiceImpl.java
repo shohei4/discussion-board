@@ -25,10 +25,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())      // ログインIDとしてemailを使う
+        return CustomUserDetails.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())   // ← 表示名を使いたいなら
                 .password(user.getPassword())
-                .authorities(List.of())
+                .autorities(List.of())     // 権限を使うならここでセット
                 .build();
     }
 }
