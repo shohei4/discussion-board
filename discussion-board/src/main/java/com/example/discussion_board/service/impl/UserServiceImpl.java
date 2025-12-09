@@ -39,19 +39,6 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
 		return userMapper.toResponse(user);
 	}
-	
-	public User findByIdUserEntity(Long id) {
-		User user = userRepository.findById(id)
-				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
-		return user;
-	}
-	
-	@Override
-	public User getUserEntityById(Long id) {
-		// TODO 自動生成されたメソッド・スタブ
-		return null;
-	}
-
 
 	@Override
 	/** ユーザー名検索 */
@@ -96,6 +83,14 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
 		userRepository.delete(user);
+	}
+
+	@Override
+	public User getUserEntityById(Long id) {
+		// TODO 自動生成されたメソッド・スタブ
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
+		return user;
 	}
 
 	

@@ -32,6 +32,7 @@ public class GidaiApiController {
 	@GetMapping
 	public ResponseEntity<List<GidaiResponse>> getAll() {
 		List<GidaiResponse> gidaiList = gidaiService.findAllGidai();
+		
 		return ResponseEntity.ok(gidaiList);
 	}
 	
