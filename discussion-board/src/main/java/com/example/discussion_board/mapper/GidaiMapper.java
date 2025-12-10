@@ -3,11 +3,11 @@ package com.example.discussion_board.mapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import com.example.discussion_board.dto.GidaiRequest;
 import com.example.discussion_board.dto.GidaiResponse;
+import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.model.Genre;
@@ -18,15 +18,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GidaiMapper {
 	
-	private final ModelMapper modelMapper;
-	
 	/**
 	 * 議題レスポンスDTOへの変換
+	 * genreをラベルで取得するために手動で記述
 	 * @param gidai
 	 * @return GidaiResponseDTO
 	 */
 	public GidaiResponse toResponse(Gidai gidai) {
-		return modelMapper.map(gidai, GidaiResponse.class);
+		User user = gidai.getUser();
+		UserSummary userSummary = new UserSummary(user.getId(), user.getUsername());
+		return GidaiResponse.builder()
+				.id(gidai.getId())
+				.gidai(gidai.getGidai())
+				.genre(gidai.getGenre().getLabel())
+				.userSummary(userSummary)
+				.build();
 	}
 	
 	public List<GidaiResponse> toResponseList(List<Gidai> gidaiList) {

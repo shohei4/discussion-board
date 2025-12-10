@@ -19,6 +19,7 @@
 					<th>議題名</th>
 					<th>ジャンル</th>
 					<th>作成者</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -29,75 +30,77 @@
 	</div>
 
 	<script>
-	window.addEventListener('DOMContentLoaded', async () => {
-	    // 1️⃣ メッセージ表示
-	    const message = sessionStorage.getItem('successMessage');
-	    if (message) {
-	        const messageDiv = document.getElementById('success-message');
-	        if (messageDiv) {
-	            messageDiv.innerText = message;
-	            messageDiv.classList.remove('d-none');
-	        }
-	        sessionStorage.removeItem('successMessage');
-	    }
-	
-	    // 2️⃣ Gidai データ取得
-	    const tbody = document.querySelector('#gidaiTable tbody');
-	    if (!tbody) return;
-	
-		async function fetchWithRefresh(url) {
-		    let accessToken = sessionStorage.getItem('accessToken');
-		    let res = await fetch(url, {
-		        headers: { 'Authorization': `Bearer ${accessToken}` }
-		    });
 		
-		    if (res.status === 401) {
-		        // アクセストークン切れ → リフレッシュ
-		        const refreshToken = sessionStorage.getItem('refreshToken');
-		
-		        const refreshRes = await fetch('/api/refresh', {
-		            method: 'POST',
-		            headers: { 'Content-Type': 'application/json' },
-		            body: JSON.stringify({ plainRefreshToken: refreshToken })
-		        });
-		
-		        if (!refreshRes.ok) {
-		            window.location.href = '/login';
-		            throw new Error('Refresh failed');
-		        }
-		
-		        const data = await refreshRes.json();
-		
-		        // 新しいトークンを保存
-		        sessionStorage.setItem('accessToken', data.accessToken);
-		        sessionStorage.setItem('refreshToken', data.plainRefreshToken);
-		        sessionStorage.setItem('refreshTokenExpiresAt', data.refreshTokenExpiresAt);
-		
-		        // 再リクエスト
-		        res = await fetch(url, {
-		            headers: { 'Authorization': `Bearer ${data.accessToken}` }
-		        });
-		    }
-	
-	        return res.json();
-	    }
-	
-	    try {
-	        const data = await fetchWithRefresh('/api/gidai');
-	        data.forEach(gidai => {
-	            const tr = document.createElement('tr');
-	            tr.innerHTML = `
+		window.addEventListener('DOMContentLoaded', async () => {
+			// 1️⃣ メッセージ表示
+			const message = sessionStorage.getItem('successMessage');
+			if (message) {
+				const messageDiv = document.getElementById('success-message');
+				if (messageDiv) {
+					messageDiv.innerText = message;
+					messageDiv.classList.remove('d-none');
+				}
+				sessionStorage.removeItem('successMessage');
+			}
+
+			// 2️⃣ Gidai データ取得
+			const tbody = document.querySelector('#gidaiTable tbody');
+			if (!tbody) return;
+
+			async function fetchWithRefresh(url) {
+				let accessToken = sessionStorage.getItem('accessToken');
+				let res = await fetch(url, {
+					headers: {'Authorization': `Bearer ${accessToken}`}
+				});
+
+				if (res.status === 401) {
+					// アクセストークン切れ → リフレッシュ
+					const refreshToken = sessionStorage.getItem('refreshToken');
+
+					const refreshRes = await fetch('/api/refresh', {
+						method: 'POST',
+						headers: {'Content-Type': 'application/json'},
+						body: JSON.stringify({plainRefreshToken: refreshToken})
+					});
+
+					if (!refreshRes.ok) {
+						window.location.href = '/login';
+						throw new Error('Refresh failed');
+					}
+
+					const data = await refreshRes.json();
+
+					// 新しいトークンを保存
+					sessionStorage.setItem('accessToken', data.accessToken);
+					sessionStorage.setItem('refreshToken', data.plainRefreshToken);
+					sessionStorage.setItem('refreshTokenExpiresAt', data.refreshTokenExpiresAt);
+
+					// 再リクエスト
+					res = await fetch(url, {
+						headers: {'Authorization': `Bearer ${data.accessToken}`}
+					});
+				}
+
+				return res.json();
+			}
+
+			try {
+				const data = await fetchWithRefresh('/api/gidai');
+				data.forEach(gidai => {
+					const tr = document.createElement('tr');
+					tr.innerHTML = `
 	                <td>${gidai.id}</td>
 	                <td>${gidai.gidai}</td>
 	                <td>${gidai.genre}</td>
 	                <td>${gidai.userSummary?.username || ''}</td>
+	                <td><a href="view/discussion?id=${gidai.id}">詳細</a></td>
 	            `;
-	            tbody.appendChild(tr);
-	        });
-	    } catch (err) {
-	        console.error(err);
-	    }
-	});
+					tbody.appendChild(tr);
+				});
+			} catch (err) {
+				console.error(err);
+			}
+		});
 	</script>
 
 

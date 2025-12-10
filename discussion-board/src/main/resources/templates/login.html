@@ -48,47 +48,60 @@
 	</div>
 
 	<script>
-		//ログイン認証トークン取得を関数化
-		async function login(email, password) {
-			const response = await fetch('/api/auth/login', {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json'},
-				body: JSON.stringify({email, password})
+
+		window.addEventListener('DOMContentLoaded', () => {
+			const msg = sessionStorage.getItem('successMessage');
+			if (msg) {
+				const messageDiv = document.getElementById("success-message");
+				messageDiv.textContent = msg;
+				messageDiv.classList.remove("d-none");
+				//表示後削除
+				sessionStorage.removeItem('successMessage');
+			}
+
+
+			//ログイン認証トークン取得を関数化
+			async function login(email, password) {
+				const response = await fetch('/api/auth/login', {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({email, password})
+				});
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => null);
+					throw new Error(errorData?.error || await response.text());
+				}
+
+				return response.json();// { accessToken, refreshToken, refreshTokenExpiresAt }
+			}
+
+
+			//ログイン認証処理
+			document.getElementById('login-form').addEventListener('submit', async (e) => {
+				e.preventDefault();
+				const errorDiv = document.getElementById('error-message');
+				errorDiv.innerText = '';
+
+				const email = document.getElementById('email').value;
+				const password = document.getElementById('password').value;
+
+				try {
+					//ログインして JWT を取得
+					const data = await login(email, password);
+
+					//JWTとRefreshTokenを保存
+					sessionStorage.setItem('accessToken', data.accessToken);
+					sessionStorage.setItem('refreshToken', data.refreshToken);
+					sessionStorage.setItem('refreshTokenExpiresAt', data.refreshTokenExpiresAt);
+					sessionStorage.setItem('successMessage', 'ログイン成功');
+					//必要なら別ページへ遷移
+					window.location.href = '/view/gidai/list';
+
+				} catch (err) {
+					errorDiv.innerText = err.message;
+					console.error(err);
+				}
 			});
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => null);
-				throw new Error(errorData?.error || await response.text());
-			}
-
-			return response.json();// { accessToken, refreshToken, refreshTokenExpiresAt }
-		}
-
-
-		//ログイン認証処理
-		document.getElementById('login-form').addEventListener('submit', async (e) => {
-			e.preventDefault();
-			const errorDiv = document.getElementById('error-message');
-			errorDiv.innerText = '';
-
-			const email = document.getElementById('email').value;
-			const password = document.getElementById('password').value;
-
-			try {
-				//ログインして JWT を取得
-				const data = await login(email, password);
-
-				//JWTとRefreshTokenを保存
-				sessionStorage.setItem('accessToken', data.accessToken);
-				sessionStorage.setItem('refreshToken', data.refreshToken);
-				sessionStorage.setItem('refreshTokenExpiresAt', data.refreshTokenExpiresAt);
-
-				//必要なら別ページへ遷移
-				window.location.href = '/view/gidai/list';
-
-			} catch (err) {
-				errorDiv.innerText = err.message;
-				console.error(err);
-			}
 		});
 
 	</script>
