@@ -78,4 +78,85 @@
 	</style>
 </head>
 
+<body>
+	<div class="container mt-4">
+		<h2 class="mb-4">議論コメント</h2>
+
+
+		<!-- 投稿フォーム -->
+		<form id="discussionForm" class="card p-3 shadow-sm mb-4">
+			<div class="mb-3">
+				<label class="form-label">コメント</label>
+				<textarea id="comment" class="form-control" rows="3"></textarea>
+			</div>
+			<div id="message" class="text-danger fw-bold mb-2"></div>
+			<button type="submit" class="btn btn-primary">投稿</button>
+		</form>
+
+
+		<!-- コメント一覧 -->
+		<div id="commentList" class="list-group"></div>
+	</div>
+	
+	<script>
+		const API_BASE = "http://localhost:8080/api/disucssion"
+
+		//コメント投稿
+		document.getElementById('discussionForm').addEventListener("submit", async (e) => {
+			e.preventDefault();
+
+			const token = sessionStorage.getItem('accessToken');
+			const comment = document.getElementById('comment').value;
+			const params = new URLSearchParams(window.location.search);
+			const gidaiId = params.get("gidaiId");
+
+			if (!token) {
+				document.getElementById('message').innerText = "ログインが必要です";
+				return;
+			}
+
+			try {
+				const response = await fetch(`${API_BASE}/save/${gidaiId}`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": `Bearer ${token}`
+					},
+					body: JSON.stringify({comment})
+				});
+
+				if (!response.ok) throw new Error("投稿に失敗しました");
+
+				const data = await response.json();
+				appendComment(data)
+				document.getElementById('comment').value = "";
+				document.getElementById('message').innerText = "";
+			} catch (err) {
+				document.getElementById('message').innerText = err.message;
+			}
+		});
+
+		//コメント表示
+		function appendComment(item) {
+			const list = document.getElementById('commentList');
+			const div = document.createElement('div');
+			div.className = "list-group-item";
+			div.innerHTML = `<strong>${item.userName}</strong><br>${item.comment}<br><small>${item.createdAt}</small>`;
+			list.prepared(div);
+		}
+
+		//一覧表示
+		async function loadComments() {
+			const params = new URLSearchParams(window.location.search);
+			const gidaiId = params.get("gidaiId"); // URL から取得
+			const response = await fetch(`${API_BASE}/list/${gidaiId}`);
+			const data = await response.json();
+			data.forEach(appendComment);
+		}
+		
+		loadComments();
+	</script>
+	
+</body>
+
 </html>

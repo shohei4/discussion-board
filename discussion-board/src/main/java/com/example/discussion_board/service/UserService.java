@@ -27,7 +27,7 @@ public interface UserService {
 	 * @return UserEntiy
 	 */
 	User getUserEntityById(Long id);
-
+	
 	/**
 	 * ユーザー名検索
 	 * @param username ユーザー名

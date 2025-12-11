@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
 		return userMapper.toResponse(user);
 	}
-
+	
 	@Override
 	/** ユーザー名検索 */
 	public UserResponse findByUsernameUser(String username) {
@@ -92,6 +92,8 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
 		return user;
 	}
+
+	
 
 	
 }

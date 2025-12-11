@@ -15,5 +15,5 @@ public class GidaiResponse {
 	private String gidai;
 	private String genre;
 	private UserSummary userSummary;
-
+	private GidaiSummary gidaiSummary;
 }

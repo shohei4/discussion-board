@@ -17,7 +17,7 @@ public interface DiscussionItemService {
 	 * @param request
 	 * @return レスポンスDTO
 	 */
-	DiscussionItemResponse createDiscussionItem(DiscussionItemRequest request);
+	DiscussionItemResponse createDiscussionItem(DiscussionItemRequest request, Long gidaiId, Long userId);
 	
 	/**
 	 * 議論コメントを編集
