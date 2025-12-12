@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 
 <head>
 	<meta charset="UTF-8">
@@ -8,80 +8,13 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 
-	<style>
-		body {
-			background: #f5f5f5;
-		}
 
-
-		.chat-container {
-			max-width: 720px;
-			margin: 0 auto;
-			padding-bottom: 80px;
-			/* 入力欄分の余白 */
-		}
-
-
-		.chat-message {
-			display: flex;
-			margin: 10px 0;
-		}
-
-
-		.chat-message.me {
-			justify-content: flex-end;
-		}
-
-
-		.bubble {
-			background: #fff;
-			padding: 12px 16px;
-			border-radius: 14px;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-			max-width: 75%;
-			word-break: break-word;
-		}
-
-
-		/* 入力欄固定 */
-		.input-area {
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			width: 100%;
-			padding: 12px;
-			background: #ffffff;
-			box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
-		}
-
-
-		.input-box {
-			display: flex;
-			gap: 8px;
-			max-width: 720px;
-			margin: 0 auto;
-		}
-
-
-		.chat-input {
-			flex: 1;
-			border-radius: 20px;
-			border: 1px solid #ddd;
-			padding: 10px 14px;
-		}
-
-
-		.send-btn {
-			border-radius: 20px;
-			padding: 10px 20px;
-		}
-	</style>
 </head>
 
 <body>
 	<div class="container mt-4">
 		<h2 class="mb-4">議論コメント</h2>
-
+		<div id="gidai-data" th:attr="data-gidai-id=${gidaiId}"></div>
 
 		<!-- 投稿フォーム -->
 		<form id="discussionForm" class="card p-3 shadow-sm mb-4">
@@ -97,9 +30,9 @@
 		<!-- コメント一覧 -->
 		<div id="commentList" class="list-group"></div>
 	</div>
-	
+
 	<script>
-		const API_BASE = "http://localhost:8080/api/disucssion"
+		const API_BASE = "http://localhost:8080/api/discussion"
 
 		//コメント投稿
 		document.getElementById('discussionForm').addEventListener("submit", async (e) => {
@@ -107,8 +40,7 @@
 
 			const token = sessionStorage.getItem('accessToken');
 			const comment = document.getElementById('comment').value;
-			const params = new URLSearchParams(window.location.search);
-			const gidaiId = params.get("gidaiId");
+			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
 
 			if (!token) {
 				document.getElementById('message').innerText = "ログインが必要です";
@@ -141,22 +73,33 @@
 			const list = document.getElementById('commentList');
 			const div = document.createElement('div');
 			div.className = "list-group-item";
-			div.innerHTML = `<strong>${item.userName}</strong><br>${item.comment}<br><small>${item.createdAt}</small>`;
-			list.prepared(div);
+			div.innerHTML = `<strong>${item.userSummary.username}</strong><br>${item.comment}<br><small>${item.createdAt}</small>`;
+			list.append(div);
 		}
 
 		//一覧表示
 		async function loadComments() {
-			const params = new URLSearchParams(window.location.search);
-			const gidaiId = params.get("gidaiId"); // URL から取得
-			const response = await fetch(`${API_BASE}/list/${gidaiId}`);
+			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+
+			const token = sessionStorage.getItem('accessToken');
+
+			const response = await fetch(`${API_BASE}/list/${gidaiId}`, {
+				headers: {
+					"Authorization": `Bearer ${token}`
+				}
+			});
+
+			if (!response.ok) {
+				console.error("一覧取得失敗", response.status);
+				return;
+			}
+
 			const data = await response.json();
 			data.forEach(appendComment);
 		}
-		
-		loadComments();
+
 	</script>
-	
+
 </body>
 
 </html>

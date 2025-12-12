@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.example.discussion_board.dto.DiscussionItemRequest;
 import com.example.discussion_board.dto.DiscussionItemResponse;
+import com.example.discussion_board.dto.GidaiSummary;
+import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.DiscussionItem;
 
 import lombok.RequiredArgsConstructor;
@@ -16,7 +18,18 @@ public class DiscussionItemMapper {
 	private final ModelMapper modelMapper;
 	
 	public DiscussionItemResponse toResponse(DiscussionItem discussionItem) {
-		DiscussionItemResponse response = modelMapper.map(discussionItem, DiscussionItemResponse.class);
+		//簡易ユーザークラス作成
+		UserSummary userSummary = new UserSummary(discussionItem.getUser().getId(), discussionItem.getUser().getUsername());
+		//簡易議題クラス作成
+		GidaiSummary gidaiSummary = new GidaiSummary(discussionItem.getGidai().getId(), discussionItem.getGidai().getGidai());
+		DiscussionItemResponse response = DiscussionItemResponse.builder()
+									.id(discussionItem.getId())
+									.comment(discussionItem.getComment())
+									.gidaiSummary(gidaiSummary)
+									.userSummary(userSummary)
+									.createdAt(discussionItem.getCreatedAt())
+									.updatedAt(discussionItem.getUpdatedAt())
+									.build();
 		return response;
 	}
 	

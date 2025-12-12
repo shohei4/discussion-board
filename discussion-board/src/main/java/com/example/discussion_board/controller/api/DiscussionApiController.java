@@ -35,7 +35,7 @@ public class DiscussionApiController {
 	@PostMapping("/save/{gidaiId}")
 	public ResponseEntity<DiscussionItemResponse> save(@PathVariable Long gidaiId, 
 			@RequestBody DiscussionItemRequest request, @AuthenticationPrincipal CustomUserDetails user){
-		DiscussionItemResponse response = discussionItemService.createDiscussionItem(request, gidaiId, gidaiId);
+		DiscussionItemResponse response = discussionItemService.createDiscussionItem(request, gidaiId, user.getId());
 		
 		URI location = URI.create("/api/discussoin/" + response.getId());
 		return ResponseEntity.created(location).body(response);
