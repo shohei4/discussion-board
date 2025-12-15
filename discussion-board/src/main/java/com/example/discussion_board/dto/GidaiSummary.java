@@ -7,5 +7,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class GidaiSummary {
 	private Long id;
-	private String gidai;
+	private String title;
+	private String body;
 }

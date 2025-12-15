@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Insert title here</title>
+</head>
+
+<body>
+	<div class="container mt-4">
+		<h2 th:text="${gidai.title}">議題タイトル</h2>
+		<p th:text="${gidai.body}">本文</p>
+		<p>作成者: <span th:text="${gidai.userSummary.username}"></span></p>
+
+		<!-- 更新ボタン -->
+		<a th:href="@{/view/gidai/edit/{id}(id=${gidai.id})}" class="btn btn-warning mb-3">編集</a>
+
+		<!-- コメント投稿ボタン -->
+		<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#commentModal">
+			コメント投稿
+		</button>
+
+		<!-- コメント一覧 -->
+		<div class="container mt-4">
+			<h2 class="mb-4">議論コメント</h2>
+			<!-- 議題ID取得 -->
+			<div id="gidai-data" th:attr="data-gidai-id=${gidaiId}"></div>
+
+			<!-- コメント一覧 -->
+			<div id="commentList" class="list-group"></div>
+
+			<!-- コメント投稿モーダル -->
+			<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel"
+				aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="commentModalLabel">コメント投稿</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+						</div>
+						<div class="modal-body">
+							<textarea id="modalComment" class="form-control" rows="3" placeholder="コメントを入力"></textarea>
+							<div id="modalMessage" class="text-danger fw-bold mt-2"></div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+							<button type="button" class="btn btn-primary" id="submitModalComment">投稿</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+		<script>
+			const API_BASE = "http://localhost:8080/api/discussion"
+
+			//コメント表示メソッド
+			function appendComment(item) {
+				const list = document.getElementById('commentList');
+				const div = document.createElement('div');
+				div.className = "list-group-item";
+				div.innerHTML = `<strong>${item.userSummary.username}</strong><br>${item.comment}<br><small>${item.createdAt}</small>`;
+				list.prepend(div);
+			}
+
+			//一覧表示
+			document.addEventListener("DOMContentLoaded", () => {
+				loadComments();
+				
+				const modalEl = document.getElementById('commentModal');
+				modalEl.addEventListener('shown.bs.modal', () => {
+				    document.getElementById('modalComment').focus();
+				});
+			});
+
+			async function loadComments() {
+				const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+
+				const token = sessionStorage.getItem('accessToken');
+
+				const response = await fetch(`${API_BASE}/list/${gidaiId}`, {
+					headers: {
+						"Authorization": `Bearer ${token}`
+					}
+				});
+
+				if (!response.ok) {
+					console.error("一覧取得失敗", response.status);
+					return;
+				}
+
+				const data = await response.json();
+				data.forEach(appendComment);
+			}
+
+
+			// モーダルからコメント投稿
+			document.getElementById('submitModalComment').addEventListener("click", async () => {
+				const comment = document.getElementById('modalComment').value;
+				const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+				const token = sessionStorage.getItem('accessToken');
+
+				if (!token) {
+					document.getElementById('modalMessage').innerText = "ログインが必要です";
+					return;
+				}
+				if (!comment) {
+					document.getElementById('modalMessage').innerText = "コメントを入力してください";
+					return;
+				}
+
+				try {
+					const response = await fetch(`${API_BASE}/save/${gidaiId}`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"Authorization": `Bearer ${token}`
+						},
+						body: JSON.stringify({comment})
+					});
+
+					if (!response.ok) throw new Error("投稿に失敗しました");
+
+					const data = await response.json();
+					appendComment(data);
+
+					document.getElementById('modalComment').value = "";
+					document.getElementById('modalMessage').innerText = "";
+
+					// モーダルを閉じる
+					const modal = bootstrap.Modal.getInstance(document.getElementById('commentModal'));
+					modal.hide();
+
+				} catch (err) {
+					document.getElementById('modalMessage').innerText = err.message;
+				}
+			});
+		</script>
+</body>
+
+</html>

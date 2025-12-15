@@ -1,109 +1,120 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-    <meta charset="UTF-8">
-    <title>議題登録</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<meta charset="UTF-8">
+	<title>議題登録</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
 
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="card shadow p-4" style="width: 100%; max-width: 500px; border-radius: 1rem;">
-        <h3 class="text-center mb-4">議題登録</h3>
+	<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+		<div class="card shadow p-4" style="width: 100%; max-width: 500px; border-radius: 1rem;">
+			<h3 class="text-center mb-4">議題登録</h3>
 
-        <!-- メッセージ表示 -->
-        <div id="message" class="d-none text-center fw-bold mb-3"></div>
+			<!-- メッセージ表示 -->
+			<div id="message" class="d-none text-center fw-bold mb-3"></div>
 
-        <form id="gidaiForm">
-            <div class="mb-3">
-                <label for="gidai" class="form-label">議題名</label>
-                <textarea type="text" class="form-control" id="gidai" name="gidai" placeholder="議題名を入力" required></textarea>
-            </div>
+			<form id="gidaiForm">
+				<div class="mb-3">
+					<label for="title" class="form-label">タイトル</label>
+					<textarea type="text" class="form-control" id="title" name="title" placeholder="タイトルを入力"
+						required></textarea>
+				</div>
 
-            <div class="mb-3">
-                <label for="genre" class="form-label">ジャンル</label>
-				<select id="genre" name="genre" class="form-select">
-				  <option value="" disabled selected>選択してください</option>
-				  <th:block th:each="genre : ${genres}">
-					<option th:value="${genre.label}" th:text="${genre.label}"></option>
-				  </th:block>
-				</select>
-            </div>
+				<div class="mb-3">
+					<label for="body" class="form-label">本文</label>
+					<textarea type="body" class="form-control" id="body" name="body" placeholder="本文を入力"
+						required></textarea>
+				</div>
 
-            <!-- 投稿者IDはログインユーザーのIDを非表示で送信 -->
-            <input type="hidden" id="userId" name="userId" value="1">
+				<div class="mb-3">
+					<label for="genre" class="form-label">ジャンル</label>
+					<select id="genre" name="genre" class="form-select">
+						<option value="" disabled selected>選択してください</option>
+						<th:block th:each="genre : ${genres}">
+							<option th:value="${genre.label}" th:text="${genre.label}"></option>
+						</th:block>
+					</select>
+				</div>
 
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">登録</button>
-            </div>
-        </form>
-    </div>
-</div>
+				<!-- 投稿者IDはログインユーザーのIDを非表示で送信 -->
+				<input type="hidden" id="userId" name="userId" value="1">
 
-<script>
-    const form = document.getElementById('gidaiForm');
-    const messageDiv = document.getElementById('message');
+				<div class="d-grid">
+					<button type="submit" class="btn btn-primary">登録</button>
+				</div>
+			</form>
+		</div>
+	</div>
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+	<script>
+		const form = document.getElementById('gidaiForm');
+		const messageDiv = document.getElementById('message');
 
-        const token = sessionStorage.getItem('accessToken'); // ← JWT 取得
-        if (!token) {
-            messageDiv.className = 'mt-3 text-center fw-bold text-danger';
-            messageDiv.innerText = 'ログイン情報がありません';
-            messageDiv.classList.remove('d-none');
-            return;
-        }
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
 
-        const data = {
-            gidai: document.getElementById('gidai').value,
-            genre: document.getElementById('genre').value
-            // userId は送らない！
-        };
+			const token = sessionStorage.getItem('accessToken'); // ← JWT 取得
+			if (!token) {
+				messageDiv.className = 'mt-3 text-center fw-bold text-danger';
+				messageDiv.innerText = 'ログイン情報がありません';
+				messageDiv.classList.remove('d-none');
+				return;
+			}
 
-        try {
-            const response = await fetch('/api/gidai', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // ← これが重要
-                },
-                body: JSON.stringify(data)
-            });
+			const data = {
+				title: document.getElementById('title').value,
+				body: document.getElementById('body').value,
+				genre: document.getElementById('genre').value
+				// userId は送らない！
+			};
 
-            if (response.ok) {
-                const result = await response.json();
+			try {
+				const response = await fetch('/api/gidai', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${token}` // ← これが重要
+					},
+					body: JSON.stringify(data)
+				});
 
-                sessionStorage.setItem(
-                    'successMessage',
-                    `登録成功: ${result.gidai} (${result.genre})`
-                );
+				if (response.ok) {
+					const result = await response.json();
 
-                window.location.href = '/view/gidai/list';
-            } else {
-                let errorText = `登録に失敗しました (${response.status})`;
+					sessionStorage.setItem(
+						'successMessage',
+						`登録成功: ${result.gidai} (${result.genre})`
+					);
 
-                try {
-                    // API が返した JSON の message を使う（あれば）
-                    const errJson = await response.json();
-                    if (errJson.message) {
-                        errorText += `\n${errJson.message}`;
-                    }
-                } catch (jsonError) {
-                    // JSON でない場合は何もしない
-                }
+					window.location.href = '/view/gidai/list';
+				} else {
+					let errorText = `登録に失敗しました (${response.status})`;
 
-                messageDiv.className = 'mt-3 text-center fw-bold text-danger';
-                messageDiv.innerText = errorText;
-                messageDiv.classList.remove('d-none');
-            }
-        } catch (error) {
-            messageDiv.className = 'mt-3 text-center fw-bold text-danger';
-            messageDiv.innerText = '通信エラーが発生しました';
-            messageDiv.classList.remove('d-none');
-        }
-    });
-</script>
+					try {
+						// API が返した JSON の message を使う（あれば）
+						const errJson = await response.json();
+						if (errJson.message) {
+							errorText += `\n${errJson.message}`;
+						}
+					} catch (jsonError) {
+						// JSON でない場合は何もしない
+					}
+
+					messageDiv.className = 'mt-3 text-center fw-bold text-danger';
+					messageDiv.innerText = errorText;
+					messageDiv.classList.remove('d-none');
+				}
+			} catch (error) {
+				messageDiv.className = 'mt-3 text-center fw-bold text-danger';
+				messageDiv.innerText = '通信エラーが発生しました';
+				messageDiv.classList.remove('d-none');
+			}
+		});
+	</script>
 
 </body>
+
 </html>

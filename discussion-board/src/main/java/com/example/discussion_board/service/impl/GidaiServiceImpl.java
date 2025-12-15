@@ -5,8 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.discussion_board.dto.GidaiRequest;
+import com.example.discussion_board.dto.GidaiRegistrationRequest;
 import com.example.discussion_board.dto.GidaiResponse;
+import com.example.discussion_board.dto.GidaiUpdateRequest;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.mapper.GidaiMapper;
@@ -42,7 +43,7 @@ public class GidaiServiceImpl implements GidaiService {
 
 
 	@Override
-	public GidaiResponse createGidai(GidaiRequest request, User user) {
+	public GidaiResponse createGidai(GidaiRegistrationRequest request, User user) {
 		// TODO 自動生成されたメソッド・スタブ
 		Gidai gidai = mapper.toEntity(request, user);
 		repository.save(gidai);
@@ -50,9 +51,16 @@ public class GidaiServiceImpl implements GidaiService {
 	}
 
 	@Override
-	public GidaiResponse editGidai(GidaiRequest request) {
+	public GidaiResponse editGidai(GidaiUpdateRequest request) {
 		// TODO 自動生成されたメソッド・スタブ
-		return null;
+		
+		Gidai gidai = repository.findById(request.getId())
+				  .orElseThrow(() -> new RuntimeException("議題が存在しません"));
+		
+		mapper.updateEntity(gidai, request);
+		
+		repository.save(gidai);
+		return mapper.toResponse(gidai);
 	}
 
 	@Override

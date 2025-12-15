@@ -32,8 +32,12 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 	@Override
 	public List<DiscussionItemResponse> findAllByGidaiId(Long gidaiId) {
 		// TODO 自動生成されたメソッド・スタブ
-		discussionItemRepository.findAllByGidaiId(gidaiId);
-		return null;
+		List<DiscussionItemResponse> responses = 
+				discussionItemRepository.findAllByGidaiId(gidaiId)
+					.stream()
+					.map(discussionItemMapper::toResponse)
+					.toList();
+		return responses;
 	}
 
 	@Override

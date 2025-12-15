@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+
+<head>
+	<meta charset="UTF-8">
+	<title>議題更新</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+
+<body class="bg-light">
+
+
+	<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+		<div class="card shadow p-4" style="width: 100%; max-width: 500px; border-radius: 1rem;">
+			<h3 class="text-center mb-4">議題更新</h3>
+
+			<!-- 議題ID取得 -->
+			<div id="gidai-data" th:attr="data-gidai-id=${gidaiId}"></div>
+			
+			<!-- メッセージ表示 -->
+			<div id="message" class="d-none text-center fw-bold mb-3"></div>
+
+			
+			<form id="gidaiUpdateForm">
+				
+				<div class="mb-3">
+					<label for="title" class="form-label">タイトル</label>
+					<textarea class="form-control" id="title" name="title" required th:text="${gidai.title}"></textarea>
+				</div>
+
+
+				<div class="mb-3">
+					<label for="body" class="form-label">本文</label>
+					<textarea class="form-control" id="body" name="body" rows="4" required
+						th:text="${gidai.body}"></textarea>
+				</div>
+
+
+				<div class="mb-3">
+					<label for="genre" class="form-label">ジャンル</label>
+					<select id="genre" name="genre" class="form-select" required>
+						<th:block th:each="genre : ${genres}">
+							<option th:value="${genre.label}" th:text="${genre.label}"
+								th:selected="${genre == gidai.genre}">
+							</option>
+						</th:block>
+					</select>
+				</div>
+
+
+				<!-- 削除フラグ -->
+				<div class="form-check mb-3">
+					<input class="form-check-input" type="checkbox" id="deleted" name="deleted"
+						th:checked="${gidai.deleted}">
+					<label class="form-check-label" for="deleted">
+						この議題を削除状態にする
+					</label>
+				</div>
+
+
+				<div class="d-grid">
+					<button type="submit" class="btn btn-warning">更新</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	
+	<script>
+		const API_BASE = "http://localhost:8080/api/gidai";
+		document.getElementById("gidaiForm").addEventListener("submit", async(e) => {
+			
+			e.preventDefault();
+			
+			//トークン取得
+			const token = sessionStorage.getItem("accessToken");
+			if(!token) {
+				alert("ログインが必要です");
+				return;
+			}
+			
+			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+			
+			const payload = {
+				title: document.getElementById("title").value,
+				body: document.getElementById("body").value,
+				genre: document.getElementById("genre").value,
+				isDeleted: document.getElementById("isDeleted").checked
+			}
+			
+			try{
+				const response = await fetch(`${API_BASE}/${gidaiId}`, {
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": `Bearer ${token}`
+					},
+					body: JSON.stringify(payload)
+				});
+				
+				if(!response.ok) {
+					throw new Error("更新に失敗しました");
+				}
+				
+				const updatedGidai = await response.json();
+				alert("更新しました" + updatedGidai.title);
+				
+				location.href = "/view/gidaiList";
+				
+			}catch (err) {
+				alert(err.message);
+			}
+		});
+	</script>
+
+
+</body>
+
+</html>

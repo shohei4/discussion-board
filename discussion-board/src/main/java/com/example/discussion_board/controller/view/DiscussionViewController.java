@@ -17,6 +17,6 @@ public class DiscussionViewController {
 	
 	@GetMapping("/registration")
 	public String viewRegistration() {
-		return "/registration";
+		return "registration";
 	}
 }

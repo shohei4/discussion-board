@@ -39,13 +39,19 @@ public class Gidai {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
-
-	@Column(nullable = false, unique = true, length = 200)
-	private String gidai;
+	
+	@Column(nullable = false, unique = true, length = 100)
+	private String title;
+	
+	@Column(nullable = false, unique = true, length = 1000)
+	private String body;
 
 	@Enumerated(EnumType.STRING) // Enum を文字列で DB に保存
 	@Column(nullable = false)
 	private Genre genre;
+	
+	@Column
+	private Boolean isDeleted;
 
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
