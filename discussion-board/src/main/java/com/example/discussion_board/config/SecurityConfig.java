@@ -51,6 +51,8 @@ public class SecurityConfig {
                         auth.requestMatchers(p.path() + "**").permitAll();
                     }
                 }
+                //権限エラーをなくすため（現状権限は触っていないから）
+                auth.requestMatchers("/api/**").authenticated();
                 auth.anyRequest().authenticated();
             })
             
