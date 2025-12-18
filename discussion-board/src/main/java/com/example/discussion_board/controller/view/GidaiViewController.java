@@ -7,11 +7,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.discussion_board.model.Genre;
+import com.example.discussion_board.service.GidaiService;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/view/gidai")
 public class GidaiViewController {
-
+	
+	private final GidaiService service;
+	
 	@GetMapping("/list")
 	public String viewList() {
 		return "gidai/list";
@@ -25,7 +31,7 @@ public class GidaiViewController {
 	
 	@GetMapping("/detail/{id}")
 	public String viewDetail(@PathVariable Long id, Model model) {
-		model.addAttribute("gidaiId", id);
+		model.addAttribute("gidaiResponse", service.findByIdGidai(id));
 		return "gidai/detail";
 	}
 	

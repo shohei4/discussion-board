@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GidaiResponse {
-
-	private Long id;
-	private String title;
-	private String body;
-	private String genre;
-	private UserSummary userSummary;
-	private GidaiSummary gidaiSummary;
+public class GidaiRequest {
+	
+    private Long id;
+    private String gidai;   // 議題名
+    private String genre;   // ジャンル
 }

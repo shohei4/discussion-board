@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.example.discussion_board.security.JwtAuthenticationFilter;
 
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -44,6 +45,13 @@ public class SecurityConfig {
 
             // 認可設定
             .authorizeHttpRequests(auth -> {
+            	
+            	 // ① Thymeleaf内部遷移（超重要）
+                auth.dispatcherTypeMatchers(
+                        DispatcherType.FORWARD,
+                        DispatcherType.ERROR
+                ).permitAll();
+            	
                 for (PermitPath p : PermitPath.defaultPermitPaths()) {
                     if (p.method() != null) {
                         auth.requestMatchers(p.method(), p.path() + "**").permitAll();
@@ -51,11 +59,8 @@ public class SecurityConfig {
                         auth.requestMatchers(p.path() + "**").permitAll();
                     }
                 }
-                //権限エラーをなくすため（現状権限は触っていないから）
-                auth.requestMatchers("/api/**").authenticated();
                 auth.anyRequest().authenticated();
             })
-            
             
 
 

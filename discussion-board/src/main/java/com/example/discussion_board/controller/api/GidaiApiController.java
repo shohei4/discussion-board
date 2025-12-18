@@ -39,13 +39,6 @@ public class GidaiApiController {
 		return ResponseEntity.ok(gidaiList);
 	}
 	
-	@GetMapping("{gidaiId}")
-	public ResponseEntity<GidaiResponse> getById(@PathVariable Long gidaiId){
-		GidaiResponse gidaiItem = gidaiService.findByIdGidai(gidaiId);
-		
-		return ResponseEntity.ok(gidaiItem);
-	}
-	
 	@PostMapping
 	public ResponseEntity<GidaiResponse> createGidai(@RequestBody GidaiRegistrationRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
 		User user = userService.getUserEntityById(userDetails.getId());

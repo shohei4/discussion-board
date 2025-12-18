@@ -38,10 +38,10 @@ public class User {
 	@Column(nullable = false)
 	private String password;
 	
-	@Column(nullable = false, updatable = false)
+	@Column(name = "created_at",nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 	
-	@Column
+	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
 	
 	//登録時に自動で日付を設定

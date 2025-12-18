@@ -50,13 +50,13 @@ public class Gidai {
 	@Column(nullable = false)
 	private Genre genre;
 	
-	@Column
+	@Column(name = "is_deleted")
 	private Boolean isDeleted;
 
-	@Column(nullable = false, updatable = false)
+	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 	
-	@Column
+	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
 
 	//登録時に日時を自動設定
