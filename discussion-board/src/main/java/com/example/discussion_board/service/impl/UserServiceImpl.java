@@ -48,6 +48,13 @@ public class UserServiceImpl implements UserService {
 		;
 		return userMapper.toResponse(user);
 	}
+	
+	@Override
+	public Long findIdByEmail(String email) {
+		// TODO 自動生成されたメソッド・スタブ
+		Long userId = userRepository.findIdByEmail(email);
+		return userId;
+	}
 
 	@Override
 	/** 登録 */
@@ -92,6 +99,8 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(() -> new NoSuchElementException("指定のユーザーが存在しません"));
 		return user;
 	}
+
+	
 
 	
 

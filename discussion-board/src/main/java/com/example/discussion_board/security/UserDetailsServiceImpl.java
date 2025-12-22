@@ -33,4 +33,5 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .autorities(List.of())     // 権限を使うならここでセット
                 .build();
     }
+    
 }

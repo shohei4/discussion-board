@@ -34,7 +34,14 @@ public interface UserService {
 	 * @return UserResponse型
 	 */
 	UserResponse findByUsernameUser(String username);
-
+	
+	/**
+	 * コメントへのいいね処理のために使用
+	 * @param email
+	 * @return ユーザーID 
+	 */
+	Long findIdByEmail(String email);
+	
 	/**
 	 * ユーザー情報を登録
 	 * @param request 登録用DTO（UserRequestなど）

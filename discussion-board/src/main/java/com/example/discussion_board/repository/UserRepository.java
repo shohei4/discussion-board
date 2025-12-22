@@ -15,4 +15,11 @@ public interface UserRepository extends JpaRepository<User, Long>{
 	
 	//Emailで一意のユーザーを検索
 	Optional<User> findByEmail(String email);
+	
+	/**
+     * コメントへのいいね処理で使用する。Idだけを取得する
+     * @param email
+     * @return　id
+     */
+    Long findIdByEmail(String email);
 }

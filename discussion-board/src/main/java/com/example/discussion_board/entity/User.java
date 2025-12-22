@@ -20,41 +20,46 @@ import lombok.Setter;
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor 
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class User {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(nullable = false, unique = true, length = 50)
 	private String username;
-	
+
 	@Column(nullable = false, unique = true, length = 100)
 	private String email;
-	
+
 	@Column(nullable = false)
 	private String password;
-	
-	@Column(name = "created_at",nullable = false, updatable = false)
+
+	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
-	
+
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
-	
+
 	//登録時に自動で日付を設定
 	@PrePersist
 	public void onCreate() {
 		this.createdAt = LocalDateTime.now();
 		this.updatedAt = LocalDateTime.now();
 	}
-	
+
 	//更新時に自動で日付を設定
 	@PreUpdate
 	public void onUpdate() {
 		this.updatedAt = LocalDateTime.now();
 	}
-	
+
+	//いいね登録時用にIdだけを持たせるコンストラクタ作成
+	public User(Long id) {
+			this.id = id;
+		}
+
 }

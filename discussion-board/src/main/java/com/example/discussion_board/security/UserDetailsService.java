@@ -11,4 +11,5 @@ public interface UserDetailsService {
      * @throws UsernameNotFoundException 指定ユーザーが存在しない場合
      */
     UserDetails loadUserByUsername(String email) throws UsernameNotFoundException;
+    
 }
