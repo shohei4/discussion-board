@@ -17,6 +17,7 @@ public class DiscussionItemResponse {
 	private String comment;
 	private UserSummary userSummary;
 	private GidaiSummary gidaiSummary;
+	private Long likeCount;
 	private String createdAt;
 	private String updatedAt;
 }

@@ -1,5 +1,7 @@
 package com.example.discussion_board.service.impl;
 
+import org.springframework.stereotype.Service;
+
 import com.example.discussion_board.entity.CommentLike;
 import com.example.discussion_board.entity.DiscussionItem;
 import com.example.discussion_board.entity.User;
@@ -8,6 +10,7 @@ import com.example.discussion_board.service.CommentLikeService;
 
 import lombok.RequiredArgsConstructor;
 
+@Service
 @RequiredArgsConstructor
 public class CommentLikeServiceImpl implements CommentLikeService{
 	
