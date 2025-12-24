@@ -14,6 +14,7 @@ import com.example.discussion_board.mapper.DiscussionItemMapper;
 import com.example.discussion_board.repository.DiscussionItemRepository;
 import com.example.discussion_board.repository.GidaiRepository;
 import com.example.discussion_board.repository.UserRepository;
+import com.example.discussion_board.service.CommentLikeService;
 import com.example.discussion_board.service.DiscussionItemService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -28,6 +29,7 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 	private final UserRepository userRepository;
 	private final GidaiRepository gidaiRepository;
 	private final DiscussionItemMapper discussionItemMapper;
+	private final CommentLikeService commentLikeService;
 	
 	@Override
 	public List<DiscussionItemResponse> findAllByGidaiId(Long gidaiId) {
@@ -35,7 +37,14 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 		List<DiscussionItemResponse> responses = 
 				discussionItemRepository.findAllByGidaiId(gidaiId)
 					.stream()
-					.map(discussionItemMapper::toResponse)
+					.map((DiscussionItem item) -> {
+						DiscussionItemResponse response = 
+								discussionItemMapper.toResponse(item);
+						//いいね数を取得してセット
+						Long likeCount = commentLikeService.conuntLikes(item.getId());
+						response.setLikeCount(likeCount);
+						return response;
+					})
 					.toList();
 		return responses;
 	}

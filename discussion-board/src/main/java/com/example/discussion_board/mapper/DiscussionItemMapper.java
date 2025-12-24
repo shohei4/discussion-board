@@ -31,6 +31,7 @@ public class DiscussionItemMapper {
 									.comment(discussionItem.getComment())
 									.gidaiSummary(gidaiSummary)
 									.userSummary(userSummary)
+									.likeCount(0L)
 									.createdAt(discussionItem.getCreatedAt().format(DateTimeFormats.JAPAN))
 									.updatedAt(discussionItem.getUpdatedAt().format(DateTimeFormats.JAPAN))
 									.build();

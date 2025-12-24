@@ -8,7 +8,7 @@ public interface CommentLikeService {
 	 * @param userId
 	 * @return true:いいね追加 false:いいね解除
 	 */
-	public boolean toggeLike(Long commentId, Long userId);
+	public boolean toggleLike(Long commentId, Long userId);
 	
 	/**
 	 * いいね数の取得処理
@@ -16,5 +16,6 @@ public interface CommentLikeService {
 	 * @return Long (特定commnetIdの登録数)
 	 */
 	public long conuntLikes(Long commentId);
+
 	
 }

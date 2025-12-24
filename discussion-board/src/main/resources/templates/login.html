@@ -91,8 +91,6 @@
 
 					//JWTとRefreshTokenを保存
 					sessionStorage.setItem('accessToken', data.accessToken);
-					sessionStorage.setItem('refreshToken', data.refreshToken);
-					sessionStorage.setItem('refreshTokenExpiresAt', data.refreshTokenExpiresAt);
 					sessionStorage.setItem('successMessage', 'ログイン成功');
 					//必要なら別ページへ遷移
 					window.location.href = '/view/gidai/list';

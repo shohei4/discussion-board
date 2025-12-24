@@ -2,7 +2,9 @@ package com.example.discussion_board.controller.api;
 
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,9 +34,24 @@ public class LoginApiController {
 			String email = request.getEmail();
 			String password = request.getPassword();
 			LoginResponse loginResponse = authService.login(email, password);
-
-			// 2. 成功時は ResponseEntity.ok() で返す
-			return ResponseEntity.ok(loginResponse);
+			
+			//2. RefreshTokenをHttpOnly Cokkieとして構築
+			ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", loginResponse.getPlainRefreshToken())
+					.httpOnly(true) // JSからアクセス不可になる
+					.secure(false)   // HTTPSのみ
+					.path("/")      // サイト全体で有効
+					.maxAge(14 * 24 * 60 * 60) //14日間
+					.sameSite("Strict") // CSRF対策
+					.build();
+			// 3. レスポンスの構築
+			Map<String, Object> body = Map.of(
+				"accessToken", loginResponse.getAccessToken(),
+				"refreshTokenExpiresAt", loginResponse.getRefreshTokenExpiresAt()
+			);
+					
+			return ResponseEntity.ok()
+					.header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString()) //Cookieをセット
+					.body(body);
 		} catch (AuthException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(Map.of(

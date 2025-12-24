@@ -23,10 +23,12 @@ public class CommentLikeApiContorller {
 	private final UserService userService;
 	
 	@PostMapping("/toggle/{commentId}")
-	public ResponseEntity<?> toggleLike(@PathVariable Long commentId, @AuthenticationPrincipal UserDetails user) {
+	public ResponseEntity<Boolean> toggleLike(@PathVariable Long commentId, @AuthenticationPrincipal UserDetails user) {
 		Long userId = userService.findIdByEmail(user.getUsername());
-		commentLikeService.toggeLike(commentId, userId);
-		return ResponseEntity.ok().build();
+		//サービス返値をそのままレスポンスボディ二入れる
+		boolean isLiked = commentLikeService.toggleLike(commentId, userId);
+		commentLikeService.toggleLike(commentId, userId);
+		return ResponseEntity.ok(isLiked);
 	}
 	
 	@GetMapping("/count/{commentId}")

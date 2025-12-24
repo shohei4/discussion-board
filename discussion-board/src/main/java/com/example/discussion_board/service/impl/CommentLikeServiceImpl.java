@@ -17,7 +17,7 @@ public class CommentLikeServiceImpl implements CommentLikeService{
 	private final CommentLikeRepository repository;
 	
 	@Override
-	public boolean toggeLike(Long commentId, Long userId) {
+	public boolean toggleLike(Long commentId, Long userId) {
 		// TODO 自動生成されたメソッド・スタブ
 		boolean exists = repository
 				.existsByDiscussionItem_IdAndUser_Id(commentId, userId);
@@ -39,7 +39,8 @@ public class CommentLikeServiceImpl implements CommentLikeService{
 	public long conuntLikes(Long commentId) {
 		// TODO 自動生成されたメソッド・スタブ
 		Long count = repository.countByDiscussionItem_Id(commentId);
-		return count;
+		//nullチェック
+		return count != null ? count : 0L;
 	}
 
 
