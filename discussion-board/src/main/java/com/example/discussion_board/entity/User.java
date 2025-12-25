@@ -57,9 +57,4 @@ public class User {
 		this.updatedAt = LocalDateTime.now();
 	}
 
-	//いいね登録時用にIdだけを持たせるコンストラクタ作成
-	public User(Long id) {
-			this.id = id;
-		}
-
 }

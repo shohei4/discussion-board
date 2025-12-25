@@ -46,86 +46,58 @@
 		</table>
 		<a th:href="@{/view/gidai/registration}">新規登録はこちら</a>
 	</div>
-
+	
+	<script src="/js/apiClient.js"></script>
 	<script>
-
-		// 文字列を指定文字数で切り詰める関数
-		function truncate(str, maxLength) {
-			if (!str) return "";
-			return str.length > maxLength ? str.substring(0, maxLength) + "…" : str;
-		}
-
-		window.addEventListener('DOMContentLoaded', async () => {
-			// 1️⃣ メッセージ表示
-			const message = sessionStorage.getItem('successMessage');
-			if (message) {
-				const messageDiv = document.getElementById('success-message');
-				if (messageDiv) {
-					messageDiv.innerText = message;
-					messageDiv.classList.remove('d-none');
-				}
-				sessionStorage.removeItem('successMessage');
-			}
-
-			// 2️⃣ Gidai データ取得
-			const tbody = document.querySelector('#gidaiTable tbody');
-			if (!tbody) return;
-
-			async function fetchWithRefresh(url) {
-				let accessToken = sessionStorage.getItem('accessToken');
-				let res = await fetch(url, {
-					headers: {'Authorization': `Bearer ${accessToken}`}
-				});
-
-				if (res.status === 401) {
-					// アクセストークン切れ → リフレッシュ
-					const refreshToken = sessionStorage.getItem('refreshToken');
-
-					const refreshRes = await fetch('/api/refresh', {
-						method: 'POST',
-						headers: {'Content-Type': 'application/json'},
-						body: JSON.stringify({plainRefreshToken: refreshToken})
-					});
-
-					if (!refreshRes.ok) {
-						window.location.href = '/login';
-						throw new Error('Refresh failed');
-					}
-
-					const data = await refreshRes.json();
-
-					// 新しいトークンを保存
-					sessionStorage.setItem('accessToken', data.accessToken);
-					sessionStorage.setItem('refreshToken', data.plainRefreshToken);
-					sessionStorage.setItem('refreshTokenExpiresAt', data.refreshTokenExpiresAt);
-
-					// 再リクエスト
-					res = await fetch(url, {
-						headers: {'Authorization': `Bearer ${data.accessToken}`}
-					});
-				}
-
-				return res.json();
-			}
-
-			try {
-				const data = await fetchWithRefresh('/api/gidai');
-				data.forEach(gidai => {
-					const tr = document.createElement('tr');
-					tr.innerHTML = `
-	                <td>${gidai.id}</td>
-					<td>${truncate(gidai.title, 20)}</td> <!-- タイトルは20文字で切る -->
-					<td><div class="multiline-truncate">${gidai.body}</div></td> <!-- 本文はCSSで省略 -->
-	                <td>${gidai.genre}</td>
-	                <td>${gidai.userSummary?.username || ''}</td>
-	                <td><a href="/view/gidai/detail/${gidai.id}">詳細</a></td>
-	            `;
-					tbody.appendChild(tr);
-				});
-			} catch (err) {
-				console.error(err);
-			}
-		});
+	    // 文字列を指定文字数で切り詰める関数
+	    function truncate(str, maxLength) {
+	        if (!str) return "";
+	        return str.length > maxLength ? str.substring(0, maxLength) + "…" : str;
+	    }
+	
+	    window.addEventListener('DOMContentLoaded', async () => {
+	        // 1️⃣ メッセージ表示（変更なし）
+	        const message = sessionStorage.getItem('successMessage');
+	        if (message) {
+	            const messageDiv = document.getElementById('success-message');
+	            if (messageDiv) {
+	                messageDiv.innerText = message;
+	                messageDiv.classList.remove('d-none');
+	            }
+	            sessionStorage.removeItem('successMessage');
+	        }
+	
+	        // 2️⃣ Gidai データ取得
+	        const tbody = document.querySelector('#gidaiTable tbody');
+	        if (!tbody) return;
+	
+	        try {
+	            // ★ 自前のfetchWithRefreshを消して、共通のauthenticatedFetchを使う
+	            const response = await authenticatedFetch('/api/gidai');
+	            
+	            if (!response.ok) {
+	                throw new Error('データの取得に失敗しました');
+	            }
+	
+	            const data = await response.json();
+	            
+	            data.forEach(gidai => {
+	                const tr = document.createElement('tr');
+	                tr.innerHTML = `
+	                    <td>${gidai.id}</td>
+	                    <td>${truncate(gidai.title, 20)}</td>
+	                    <td><div class="multiline-truncate">${gidai.body}</div></td>
+	                    <td>${gidai.genre}</td>
+	                    <td>${gidai.userSummary?.username || ''}</td>
+	                    <td><a href="/view/gidai/detail/${gidai.id}">詳細</a></td>
+	                `;
+	                tbody.appendChild(tr);
+	            });
+	        } catch (err) {
+	            console.error("エラーが発生しました:", err);
+	            // 必要に応じてユーザーにエラーを通知する処理
+	        }
+	    });
 	</script>
 
 

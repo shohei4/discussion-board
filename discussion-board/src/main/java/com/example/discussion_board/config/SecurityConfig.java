@@ -51,6 +51,9 @@ public class SecurityConfig {
                         DispatcherType.FORWARD,
                         DispatcherType.ERROR
                 ).permitAll();
+                
+                //fav.iconスルー
+                
             	
                 for (PermitPath p : PermitPath.defaultPermitPaths()) {
                     if (p.method() != null) {

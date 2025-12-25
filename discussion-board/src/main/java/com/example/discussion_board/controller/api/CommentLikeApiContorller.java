@@ -27,7 +27,6 @@ public class CommentLikeApiContorller {
 		Long userId = userService.findIdByEmail(user.getUsername());
 		//サービス返値をそのままレスポンスボディ二入れる
 		boolean isLiked = commentLikeService.toggleLike(commentId, userId);
-		commentLikeService.toggleLike(commentId, userId);
 		return ResponseEntity.ok(isLiked);
 	}
 	

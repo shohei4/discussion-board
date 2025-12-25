@@ -52,9 +52,4 @@ public class DiscussionItem {
 	public void onUpdate() {
 		this.updatedAt = LocalDateTime.now();
 	}
-	
-	//いいね登録時用にIdだけを持たせるコンストラクタ作成
-	public DiscussionItem(Long id) {
-		this.id = id;
-	}
 }
