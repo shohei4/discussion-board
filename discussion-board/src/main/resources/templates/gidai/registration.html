@@ -48,69 +48,47 @@
 			</form>
 		</div>
 	</div>
-
+	<script src="/js/apiClient.js"></script>
 	<script>
 		const form = document.getElementById('gidaiForm');
 		const messageDiv = document.getElementById('message');
 
+		// エラー表示用の共通パーツ
+		const displayError = (msg) => {
+			messageDiv.className = 'mt-3 text-center fw-bold text-danger'
+			messageDiv.innerText = msg;
+			messageDiv.classList.remove('d-none');
+		}
+
 		form.addEventListener('submit', async (e) => {
 			e.preventDefault();
 
-			const token = sessionStorage.getItem('accessToken'); // ← JWT 取得
-			if (!token) {
-				messageDiv.className = 'mt-3 text-center fw-bold text-danger';
-				messageDiv.innerText = 'ログイン情報がありません';
-				messageDiv.classList.remove('d-none');
-				return;
-			}
-
+			//1. 送信データの作成
 			const data = {
 				title: document.getElementById('title').value,
 				body: document.getElementById('body').value,
 				genre: document.getElementById('genre').value
-				// userId は送らない！
 			};
 
 			try {
-				const response = await fetch('/api/gidai', {
+				//2. 認証付きfetchの実行(トークンの付与・リフレッシュ)
+				const response = await authenticatedFetch('/api/gidai', {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `Bearer ${token}` // ← これが重要
-					},
 					body: JSON.stringify(data)
 				});
 
+				//3. レスポンス判定
 				if (response.ok) {
 					const result = await response.json();
-
-					sessionStorage.setItem(
-						'successMessage',
-						`登録成功: ${result.title} (${result.genre})`
-					);
-
+					sessionStorage.setItem('successMessage', `登録成功: ${result.title}`);
 					window.location.href = '/view/gidai/list';
 				} else {
-					let errorText = `登録に失敗しました (${response.status})`;
-
-					try {
-						// API が返した JSON の message を使う（あれば）
-						const errJson = await response.json();
-						if (errJson.message) {
-							errorText += `\n${errJson.message}`;
-						}
-					} catch (jsonError) {
-						// JSON でない場合は何もしない
-					}
-
-					messageDiv.className = 'mt-3 text-center fw-bold text-danger';
-					messageDiv.innerText = errorText;
-					messageDiv.classList.remove('d-none');
+					const errJson = await response.json().catch(() => ({}));
+					displayError(errJson.message || `登録に失敗しました (${response.status})`);
 				}
-			} catch (error) {
-				messageDiv.className = 'mt-3 text-center fw-bold text-danger';
-				messageDiv.innerText = '通信エラーが発生しました';
-				messageDiv.classList.remove('d-none');
+			} catch(error) {
+				console.error('Submit Error:', error);
+				displayError('通信エラーが発生しました。サーバーとの接続を確認してください。');
 			}
 		});
 	</script>

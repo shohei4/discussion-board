@@ -16,19 +16,19 @@
 			<div class="card-body">
 
 				<!-- タイトル -->
-				<h2 id="title" class="card-title fw-bold mb-3">
+				<h2 id="title" class="card-title fw-bold mb-3" th:text="${gidaiResponse.title}">
 					議題タイトル
 				</h2>
 
 				<!-- 本文 -->
-				<p id="body" class="card-text fs-5 mb-4">
+				<p id="body" class="card-text fs-5 mb-4" th:text="${gidaiResponse.body}">
 					本文
 				</p>
 
 				<!-- 作成者 -->
 				<p class="text-muted mb-4">
 					作成者：
-					<span id="username" class="fw-semibold"></span>
+					<span id="username" class="fw-semibold" th:text="${gidaiResponse.userSummary.username}"></span>
 				</p>
 
 				<!-- 操作ボタン -->
@@ -45,7 +45,7 @@
 		</div>
 
 		<!-- 議題ID（JS用） -->
-		<div id="gidai-data" th:attr="data-gidai-id=${gidaiId}"></div>
+		<div id="gidai-data" th:data-gidai-id="${gidaiResponse.id}"></div>
 
 		<!-- コメント一覧 -->
 		<div class="card shadow-sm">
@@ -85,7 +85,10 @@
 	<script src="/js/apiClient.js"></script>
 	<script>
 		const API_BASE = "http://localhost:8080/api/discussion"
-
+		//DOMからgidaiIdを取得
+		const gidaiId = document.getElementById('gidai-data')?.dataset.gidaiId;
+		console.log("チェック - IDの中身:", gidaiId); // ←ここで undefined が出たらHTML側の属性名ミスです
+		
 		//議題取得メソッド
 		async function loadGidaiResponse(gidaiId) {
 			const response = await authenticatedFetch(`/api/gidai/${gidaiId}`); // 認証付きfetch
@@ -215,7 +218,7 @@
 				alert('ログインが必要か、通信エラーが発生しました。');
 			} finally {
 				//4. ボタンの再度有効化
-				btmElement.disabled = false;
+				btnElement.disabled = false;
 			}
 		}
 		

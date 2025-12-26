@@ -52,7 +52,9 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Long findIdByEmail(String email) {
 		// TODO 自動生成されたメソッド・スタブ
-		Long userId = userRepository.findIdByEmail(email);
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + email));
+		Long userId = user.getId();
 		return userId;
 	}
 
