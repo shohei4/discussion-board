@@ -16,19 +16,19 @@
 			<div class="card-body">
 
 				<!-- タイトル -->
-				<h2 id="title" class="card-title fw-bold mb-3" th:text="${gidaiResponse.title}">
+				<h2 id="title" class="card-title fw-bold mb-3">
 					議題タイトル
 				</h2>
 
 				<!-- 本文 -->
-				<p id="body" class="card-text fs-5 mb-4" th:text="${gidaiResponse.body}">
+				<p id="body" class="card-text fs-5 mb-4">
 					本文
 				</p>
 
 				<!-- 作成者 -->
 				<p class="text-muted mb-4">
 					作成者：
-					<span id="username" class="fw-semibold" th:text="${gidaiResponse.userSummary.username}"></span>
+					<span id="username" class="fw-semibold"></span>
 				</p>
 
 				<!-- 操作ボタン -->
@@ -45,7 +45,7 @@
 		</div>
 
 		<!-- 議題ID（JS用） -->
-		<div id="gidai-data" th:data-gidai-id="${gidaiResponse.id}"></div>
+		<div id="gidai-data" th:data-gidai-id="${gidaiId}"></div>
 
 		<!-- コメント一覧 -->
 		<div class="card shadow-sm">
@@ -88,7 +88,7 @@
 		//DOMからgidaiIdを取得
 		const gidaiId = document.getElementById('gidai-data')?.dataset.gidaiId;
 		console.log("チェック - IDの中身:", gidaiId); // ←ここで undefined が出たらHTML側の属性名ミスです
-		
+
 		//議題取得メソッド
 		async function loadGidaiResponse(gidaiId) {
 			const response = await authenticatedFetch(`/api/gidai/${gidaiId}`); // 認証付きfetch
@@ -97,27 +97,42 @@
 		}
 
 		//議題表示method
-		function renderGidaiResponse(gidaiItemResponse) {
-			document.getElementById('title').innerText = gidaiItemResponse.title;
-			document.getElementById('body').innerText = gidaiItemResponse.body;
-			document.getElementById('username').innerText = gidaiItemResponse.userSummary.username
+		function renderGidaiResponse(gidaiResponse) {
+			document.getElementById('title').innerText = gidaiResponse.title;
+			document.getElementById('body').innerText = gidaiResponse.body;
+			document.getElementById('username').innerText = gidaiResponse.userSummary.username
+
+			// 2. 編集ボタンの制御
+			const editBtn = document.getElementById('EditGidaiLink');
+			
+			
+			// 自分の投稿かどうかで「表示・非表示」と「リンク先」を切り替える
+			if (gidaiResponse.userSummary.id == currentUserId) {
+				editBtn.href = `/gidai/edit/${gidaiResponse.id}`;
+				editBtn.style.display = 'inline-block'; // 自分のなら表示
+			} else {
+				editBtn.style.display = 'none'; // 他人のなら隠す
+			}
 		}
 
 		//コメントDOM追加メソッド
 		function appendComment(item) {
 			const list = document.getElementById('commentList');
-			//コメント1件用のdiv作成
 			const div = document.createElement('div');
 			div.className = "list-group-item comment-item";
 			div.dataset.commentId = item.id;
+
+			// ★ 届いているデータに合わせて item.liked を使う
+			const btnClass = item.liked ? 'btn-primary' : 'btn-outline-primary';
+
 			div.innerHTML = `
-			<strong>${item.userSummary.username}</strong>
-			<br>${item.comment}
-			<br><small>${item.createdAt}</small>
-			<button class="like-toggle-btn btn btn-sm btn-outline-primary mt-2">
-				👍 いいね <span class="like-count">${item.likeCount || 0}</span>
-			</button>
-			`;
+		    <strong>${item.userSummary.username}</strong>
+		    <br>${item.comment}
+		    <br><small>${item.createdAt}</small>
+		    <button class="like-toggle-btn btn btn-sm ${btnClass} mt-2">
+		        👍 いいね <span class="like-count">${item.likeCount || 0}</span>
+		    </button>
+		    `;
 			list.prepend(div);
 		}
 
@@ -205,9 +220,8 @@
 				if (countSpan && data.likeCount !== undefined) {
 					countSpan.innerText = data.likeCount;
 				}
-
-				//Bootstrapのクラスを入れ替えて色を変える
-				if (data.isLiked) {
+				//Bootstrapのクラスを入れ替えて色を変える(jsonの仕様によりisLikedをlikedに変更)
+				if (data.liked) {
 					btnElement.classList.replace('btn-outline-primary', 'btn-primary');
 				} else {
 					btnElement.classList.replace('btn-primary', 'btn-outline-primary');
@@ -221,21 +235,21 @@
 				btnElement.disabled = false;
 			}
 		}
-		
+
 		// ✅ いいねボタンのトグル処理（イベント委譲）
 		document.getElementById('commentList').addEventListener('click', (e) => {
-		    // クリックされた要素の近くに「いいねボタン」があるか判定
-		    const btn = e.target.closest('.like-toggle-btn');
-		    
-		    if (btn) {
-		        // ボタンの親（comment-item）からIDを取得
-		        const commentItem = btn.closest('.comment-item');
-		        const commentId = commentItem.dataset.commentId;
-		        
-		        // 以前作成した toggleStatus 関数を呼び出す
-		        // btn を引数に渡すことで、関数内でボタンの色を変えられるようになります
-		        toggleStatus(commentId, btn);
-		    }
+			// クリックされた要素の近くに「いいねボタン」があるか判定
+			const btn = e.target.closest('.like-toggle-btn');
+
+			if (btn) {
+				// ボタンの親（comment-item）からIDを取得
+				const commentItem = btn.closest('.comment-item');
+				const commentId = commentItem.dataset.commentId;
+
+				// 以前作成した toggleStatus 関数を呼び出す
+				// btn を引数に渡すことで、関数内でボタンの色を変えられるようになります
+				toggleStatus(commentId, btn);
+			}
 		});
 
 	</script>

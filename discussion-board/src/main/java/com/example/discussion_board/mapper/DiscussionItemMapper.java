@@ -18,7 +18,7 @@ public class DiscussionItemMapper {
 
 	private final ModelMapper modelMapper;
 	
-	public DiscussionItemResponse toResponse(DiscussionItem discussionItem) {
+	public DiscussionItemResponse toResponse(DiscussionItem discussionItem, long likeCount, boolean isLiked) {
 		//簡易ユーザークラス作成
 		UserSummary userSummary = new UserSummary(discussionItem.getUser().getId(), discussionItem.getUser().getUsername());
 		//簡易議題クラス作成
@@ -31,7 +31,8 @@ public class DiscussionItemMapper {
 									.comment(discussionItem.getComment())
 									.gidaiSummary(gidaiSummary)
 									.userSummary(userSummary)
-									.likeCount(0L)
+									.likeCount(likeCount)
+									.isLiked(isLiked)
 									.createdAt(discussionItem.getCreatedAt().format(DateTimeFormats.JAPAN))
 									.updatedAt(discussionItem.getUpdatedAt().format(DateTimeFormats.JAPAN))
 									.build();

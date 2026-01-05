@@ -31,7 +31,7 @@ public class GidaiViewController {
 	
 	@GetMapping("/detail/{id}")
 	public String viewDetail(@PathVariable Long id, Model model) {
-		model.addAttribute("gidaiResponse", service.findByIdGidai(id));
+		model.addAttribute("gidaiId", id);
 		return "gidai/detail";
 	}
 	

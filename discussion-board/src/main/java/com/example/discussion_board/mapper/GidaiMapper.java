@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.example.discussion_board.dto.GidaiRegistrationRequest;
 import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.dto.GidaiUpdateRequest;
+import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
@@ -34,6 +35,20 @@ public class GidaiMapper {
 				.body(gidai.getBody())
 				.genre(gidai.getGenre().getLabel())
 				.userSummary(userSummary)
+				.build();
+	}
+	
+	public GidaiUpdateResponse toUpdateResponse(Gidai gidai, boolean editable) {
+		User user = gidai.getUser();
+		UserSummary userSummary = new UserSummary(user.getId(), user.getUsername());
+		return GidaiUpdateResponse.builder()
+				.id(gidai.getId())
+				.title(gidai.getTitle())
+				.body(gidai.getBody())
+				.genre(gidai.getGenre().getLabel())
+				.isDeleted(gidai.getIsDeleted())
+				.userSummary(userSummary)
+				.editable(editable)
 				.build();
 	}
 

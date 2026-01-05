@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.discussion_board.dto.GidaiRegistrationRequest;
 import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.dto.GidaiUpdateRequest;
+import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.entity.User;
 
 public interface GidaiService {
@@ -20,7 +21,7 @@ public interface GidaiService {
      * @param id 議題ID
      * @return GidaiResponse型
      */
-    GidaiResponse findByIdGidai(Long id);
+    GidaiUpdateResponse findByIdGidai(Long id);
 
     /**
      * 議題を登録
@@ -34,7 +35,7 @@ public interface GidaiService {
      * @param request 更新用DTO（GidaiUpdateRequest）
      * @return 更新後のGidaiResponse
      */
-    GidaiResponse editGidai(GidaiUpdateRequest request);
+    GidaiUpdateResponse editGidai(GidaiUpdateRequest request);
 
     /**
      * 議題を削除
