@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.example.discussion_board.dto.DiscussionItemRequest;
 import com.example.discussion_board.dto.DiscussionItemResponse;
 import com.example.discussion_board.dto.GidaiSummary;
+import com.example.discussion_board.dto.LikeResultResponse;
 import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.DiscussionItem;
 import com.example.discussion_board.util.DateTimeFormats;
@@ -18,7 +19,7 @@ public class DiscussionItemMapper {
 
 	private final ModelMapper modelMapper;
 	
-	public DiscussionItemResponse toResponse(DiscussionItem discussionItem, long likeCount, boolean isLiked) {
+	public DiscussionItemResponse toResponse(DiscussionItem discussionItem, LikeResultResponse likeResult) {
 		//簡易ユーザークラス作成
 		UserSummary userSummary = new UserSummary(discussionItem.getUser().getId(), discussionItem.getUser().getUsername());
 		//簡易議題クラス作成
@@ -31,8 +32,7 @@ public class DiscussionItemMapper {
 									.comment(discussionItem.getComment())
 									.gidaiSummary(gidaiSummary)
 									.userSummary(userSummary)
-									.likeCount(likeCount)
-									.isLiked(isLiked)
+									.likeResult(likeResult)
 									.createdAt(discussionItem.getCreatedAt().format(DateTimeFormats.JAPAN))
 									.updatedAt(discussionItem.getUpdatedAt().format(DateTimeFormats.JAPAN))
 									.build();

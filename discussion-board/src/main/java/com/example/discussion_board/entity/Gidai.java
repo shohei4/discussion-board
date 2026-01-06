@@ -51,7 +51,8 @@ public class Gidai {
 	private Genre genre;
 	
 	@Column(name = "is_deleted")
-	private Boolean isDeleted;
+	@Builder.Default
+	private Boolean isDeleted = false;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;

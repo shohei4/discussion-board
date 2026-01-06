@@ -19,9 +19,8 @@ public class DiscussionItemResponse {
 	private String comment;
 	private UserSummary userSummary;
 	private GidaiSummary gidaiSummary;
-	private long likeCount;
-	//いいねボタン表示用のflagフィールド
-	private boolean isLiked;
+	//いいねDTO
+	private LikeResultResponse likeResult;
 	//編集ボタン表示用のflagフィールド
 	private boolean editable;
 	private String createdAt;

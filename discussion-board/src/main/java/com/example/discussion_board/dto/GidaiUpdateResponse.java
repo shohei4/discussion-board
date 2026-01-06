@@ -17,6 +17,7 @@ public class GidaiUpdateResponse {
 	private String body;
 	private String genre;
 	private boolean isDeleted;
-	private boolean editable;
+	@Builder.Default
+	private boolean editable = false;
 	private UserSummary userSummary;
 }

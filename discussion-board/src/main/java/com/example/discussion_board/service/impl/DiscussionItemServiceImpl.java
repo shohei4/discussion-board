@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.discussion_board.dto.DiscussionItemRequest;
 import com.example.discussion_board.dto.DiscussionItemResponse;
+import com.example.discussion_board.dto.LikeResultResponse;
 import com.example.discussion_board.entity.DiscussionItem;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
@@ -46,17 +47,17 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 						Long likeCount = commentLikeService.conuntLikes(item.getId());
 						//いいね状態の取得
 						Boolean isLiked = commentLikeService.getIsLiked(item.getId(), item.getUser().getId());
+						LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
+						
 						//編集flag状態を取得
 						Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 						String  loginUsername = auth.getName();
 						boolean editable = item.getUser().getUsername().equals(loginUsername);
 						
 						DiscussionItemResponse response = DiscussionItemResponse.from(item)								
-								.likeCount(likeCount)
-								.isLiked(isLiked)
+								.likeResult(likeResult)
 								.editable(editable)
 								.build();
-						response.setLikeCount(likeCount);
 						return response;
 					})
 					.toList();
@@ -81,7 +82,8 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 		Long likeCount = commentLikeService.conuntLikes(discussionItem.getId());
 		//いいね状態の取得
 		boolean isLiked = commentLikeService.getIsLiked(discussionItem.getId(), userId);
-		DiscussionItemResponse response = discussionItemMapper.toResponse(discussionItem,likeCount, isLiked);
+		LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
+		DiscussionItemResponse response = discussionItemMapper.toResponse(discussionItem, likeResult);
 		return response;
 	}
 

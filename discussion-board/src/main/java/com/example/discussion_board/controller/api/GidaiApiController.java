@@ -17,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.example.discussion_board.dto.GidaiRegistrationRequest;
 import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.dto.GidaiUpdateRequest;
+import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.security.CustomUserDetails;
 import com.example.discussion_board.service.GidaiService;
@@ -40,8 +41,8 @@ public class GidaiApiController {
 	}
 	
 	@GetMapping("{id}")
-	public ResponseEntity<GidaiResponse> getById(@PathVariable Long id) {
-		GidaiResponse response = gidaiService.findByIdGidai(id);
+	public ResponseEntity<GidaiUpdateResponse> getById(@PathVariable Long id) {
+		GidaiUpdateResponse response = gidaiService.findByIdGidai(id);
 		return ResponseEntity.ok(response);
 	}
 	
@@ -57,10 +58,9 @@ public class GidaiApiController {
 	}
 	
 	@PutMapping("{id}")
-	public ResponseEntity<GidaiResponse> updateGidai(@PathVariable Long id, @RequestBody GidaiUpdateRequest request){
-		request.getId();
-		
-		GidaiResponse updatedGidai = gidaiService.editGidai(request);
+	public ResponseEntity<GidaiUpdateResponse> updateGidai(@PathVariable Long id, @RequestBody GidaiUpdateRequest request){
+		request.getId();		
+		GidaiUpdateResponse updatedGidai = gidaiService.editGidai(request);
 		
 		return ResponseEntity.ok(updatedGidai);
 	}
