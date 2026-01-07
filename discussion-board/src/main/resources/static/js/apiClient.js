@@ -22,18 +22,31 @@ async function refreshAccessToken() {
  * 認証付きfetch関数（AccessTokenの付与と自動リフレッシュを行う）
 */
 async function authenticatedFetch(url, options = {}) {
-	const accessToken = sessionStorage.getItem('accessToken');
+	let accessToken = sessionStorage.getItem('accessToken');
 	
-	//ヘッダー設定
-	const headers = {
-		'Content-Type' : 'application/json',
-		...options.headers
-	};
+	// 2. もしトークンがないなら、まずはリフレッシュを試みる
+    if (!accessToken) {
+        console.warn('No AccessToken. Attempting refresh before request...');
+        accessToken = await refreshAccessToken();
+        
+        if (accessToken) {
+            sessionStorage.setItem('accessToken', accessToken);
+        } else {
+            // リフレッシュも不可＝完全に未ログイン
+            alert("ログインが必要です");
+            window.location.href = '/login?timeout=true';
+            // 処理を中断させるためにエラーを投げるか、空のレスポンスを返す
+            throw new Error("Authentication required");
+        }
+    }
 	
-	if(accessToken) {
-		headers['Authorization'] = `Bearer ${accessToken}`;
-	}
-	
+	// 3. ヘッダー設定（タイポを修正し、取得したトークンを確実にセット）
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`, // ここで必ず付与
+        ...options.headers
+    };
+    
 	//fetch実行(credentials: 'include'でCokkieを送信)
 	let response = await fetch(url, {
 		...options,
@@ -41,7 +54,7 @@ async function authenticatedFetch(url, options = {}) {
 		credentials: 'include'
 	});
 	
-	//3. 401(AccessToken切れ)だった場合の自動リトライ処理
+	//4. 401(AccessToken切れ)だった場合の自動リトライ処理
 	if(response.status === 401) {
 		console.warn('AccessToken expired. Attempting to refresh...');
 		
@@ -61,7 +74,7 @@ async function authenticatedFetch(url, options = {}) {
 			//4. awaitを付けて再試行、その結果を返す
 			return fetch(url, {
 				...options,
-				heaeders: retryHeaders, 
+				headers: retryHeaders, 
 				credentials: 'include'
 				});
 		} else {

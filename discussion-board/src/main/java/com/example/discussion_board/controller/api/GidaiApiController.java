@@ -58,9 +58,8 @@ public class GidaiApiController {
 	}
 	
 	@PutMapping("{id}")
-	public ResponseEntity<GidaiUpdateResponse> updateGidai(@PathVariable Long id, @RequestBody GidaiUpdateRequest request){
-		request.getId();		
-		GidaiUpdateResponse updatedGidai = gidaiService.editGidai(request);
+	public ResponseEntity<GidaiUpdateResponse> updateGidai(@PathVariable Long id, @RequestBody GidaiUpdateRequest request){	
+		GidaiUpdateResponse updatedGidai = gidaiService.editGidai(id,request);
 		
 		return ResponseEntity.ok(updatedGidai);
 	}

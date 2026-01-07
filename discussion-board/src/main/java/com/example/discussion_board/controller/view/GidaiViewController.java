@@ -1,11 +1,14 @@
 package com.example.discussion_board.controller.view;
 
+import java.util.Arrays;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.model.Genre;
 import com.example.discussion_board.service.GidaiService;
 
@@ -16,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/view/gidai")
 public class GidaiViewController {
 	
-	private final GidaiService service;
+	private final GidaiService gidaiService;
 	
 	@GetMapping("/list")
 	public String viewList() {
@@ -37,7 +40,11 @@ public class GidaiViewController {
 	
 	@GetMapping("/update/{id}")
 	public String viewUpdate(@PathVariable Long id, Model model) {
-		model.addAttribute("gidaiId",id);
+		GidaiUpdateResponse response = gidaiService.findByIdGidai(id);
+		model.addAttribute("gidaiItem", response);
+		//ジャンルのプルダウン用のgenreオブジェクト
+		model.addAttribute("genres", Genre.values());
+		System.out.println(Arrays.toString(Genre.values()));
 		return "gidai/update";
 	}
 

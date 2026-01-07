@@ -32,10 +32,11 @@ public interface GidaiService {
 
     /**
      * 議題を更新
+     * @param id 
      * @param request 更新用DTO（GidaiUpdateRequest）
      * @return 更新後のGidaiResponse
      */
-    GidaiUpdateResponse editGidai(GidaiUpdateRequest request);
+    GidaiUpdateResponse editGidai(Long id, GidaiUpdateRequest request);
 
     /**
      * 議題を削除

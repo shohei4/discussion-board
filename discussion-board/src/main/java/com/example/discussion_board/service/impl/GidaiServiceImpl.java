@@ -56,10 +56,10 @@ public class GidaiServiceImpl implements GidaiService {
 	}
 
 	@Override
-	public GidaiUpdateResponse editGidai(GidaiUpdateRequest request) {
+	public GidaiUpdateResponse editGidai(Long id, GidaiUpdateRequest request) {
 		// TODO 自動生成されたメソッド・スタブ
 		
-		Gidai gidai = repository.findById(request.getId())
+		Gidai gidai = repository.findById(id)
 				  .orElseThrow(() -> new RuntimeException("議題が存在しません"));
 		
 		mapper.updateEntity(gidai, request);

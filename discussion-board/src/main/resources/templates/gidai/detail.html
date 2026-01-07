@@ -108,7 +108,7 @@
 			
 			// 自分の投稿かどうかで「表示・非表示」と「リンク先」を切り替える
 			if (gidaiResponse.editable == true) {
-				editBtn.href = `/gidai/edit/${gidaiResponse.id}`;
+				editBtn.href = `/view/gidai/update/${gidaiResponse.id}`;
 				editBtn.style.display = 'inline-block'; // 自分のなら表示
 			} else {
 				editBtn.style.display = 'none'; // 他人のなら隠す

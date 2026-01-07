@@ -17,7 +17,7 @@
 			<h3 class="text-center mb-4">議題更新</h3>
 
 			<!-- 議題ID取得 -->
-			<div id="gidai-data" th:attr="data-gidai-id=${gidaiId}"></div>
+			<div id="gidai-data" th:attr="data-gidai-id=${gidaiItem.id}"></div>
 			
 			<!-- メッセージ表示 -->
 			<div id="message" class="d-none text-center fw-bold mb-3"></div>
@@ -27,14 +27,14 @@
 				
 				<div class="mb-3">
 					<label for="title" class="form-label">タイトル</label>
-					<textarea class="form-control" id="title" name="title" required th:text="${gidai.title}"></textarea>
+					<textarea class="form-control" id="title" name="title" required th:text="${gidaiItem.title}"></textarea>
 				</div>
 
 
 				<div class="mb-3">
 					<label for="body" class="form-label">本文</label>
 					<textarea class="form-control" id="body" name="body" rows="4" required
-						th:text="${gidai.body}"></textarea>
+						th:text="${gidaiItem.body}"></textarea>
 				</div>
 
 
@@ -43,7 +43,7 @@
 					<select id="genre" name="genre" class="form-select" required>
 						<th:block th:each="genre : ${genres}">
 							<option th:value="${genre.label}" th:text="${genre.label}"
-								th:selected="${genre == gidai.genre}">
+								th:selected="${genre == gidaiItem.genre}">
 							</option>
 						</th:block>
 					</select>
@@ -52,8 +52,8 @@
 
 				<!-- 削除フラグ -->
 				<div class="form-check mb-3">
-					<input class="form-check-input" type="checkbox" id="deleted" name="deleted"
-						th:checked="${gidai.deleted}">
+					<input class="form-check-input" type="checkbox" id="isDeleted" name="deleted"
+						th:checked="${gidaiItem.deleted}">
 					<label class="form-check-label" for="deleted">
 						この議題を削除状態にする
 					</label>
@@ -68,19 +68,19 @@
 	</div>
 	<script src="/js/apiClient.js"></script>
 	<script>
+		// 1. まず要素（div）を取得する
+		const gidaiDataElement = document.getElementById("gidai-data");		
+		// 2. その要素から data-gidai-id の値を取り出す
+		// dataset を使うときは「ハイフンを除いて、次の文字を大文字にする（キャメルケース）」ルールがあります
+		const gidaiId = gidaiDataElement.dataset.gidaiId;
+		
+		console.log("取得したID:", gidaiId); // ここでIDが表示されるか確認してください
 		const API_BASE = "http://localhost:8080/api/gidai";
-		document.getElementById("gidaiForm").addEventListener("submit", async(e) => {
+		document.getElementById("gidaiUpdateForm").addEventListener("submit", async(e) => {
 			
 			e.preventDefault();
 			
-			//トークン取得
-			const token = sessionStorage.getItem("accessToken");
-			if(!token) {
-				alert("ログインが必要です");
-				return;
-			}
-			
-			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+			const id = document.getElementById("gidai-data").dataset.gidaiId;
 			
 			const payload = {
 				title: document.getElementById("title").value,
@@ -90,13 +90,9 @@
 			}
 			
 			try{
-				const response = await fetch(`${API_BASE}/${gidaiId}`, {
-					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": `Bearer ${token}`
-					},
-					body: JSON.stringify(payload)
+				const response = await authenticatedFetch(`${API_BASE}/${gidaiId}`, {
+					method: 'PUT',
+					body: JSON.stringify(payload) //2. payloadをJSON文字列に変換して返す
 				});
 				
 				if(!response.ok) {
