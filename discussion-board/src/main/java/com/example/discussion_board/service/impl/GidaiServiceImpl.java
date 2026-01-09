@@ -11,6 +11,7 @@ import com.example.discussion_board.dto.GidaiUpdateRequest;
 import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
+import com.example.discussion_board.exception.ResourceNotFoundException;
 import com.example.discussion_board.mapper.GidaiMapper;
 import com.example.discussion_board.repository.GidaiRepository;
 import com.example.discussion_board.service.CurrentUserService;
@@ -30,7 +31,10 @@ public class GidaiServiceImpl implements GidaiService {
 	@Override
 	public List<GidaiResponse> findAllGidai() {
 		// TODO 自動生成されたメソッド・スタブ
-		List<Gidai> gidaiList = repository.findAll();
+		List<Gidai> gidaiList = repository.findAllByIsDeletedFalse();
+		if (gidaiList.isEmpty()) {
+	        throw new ResourceNotFoundException("GIDAI_EMPTY", "表示できる議題がありません。");
+	    }
 		List<GidaiResponse> responseList = mapper.toResponseList(gidaiList);
 		return responseList;
 	}
@@ -38,7 +42,7 @@ public class GidaiServiceImpl implements GidaiService {
 	@Override
 	public GidaiUpdateResponse findByIdGidai(Long id) {
 		// TODO 自動生成されたメソッド・スタブ
-		Gidai gidai = repository.findById(id)
+		Gidai gidai = repository.findByIdAndIsDeletedFalse(id)
 				.orElseThrow(() -> new RuntimeException("指定の議題が存在しません"));
 		//編集flagの取得
 		boolean editable = currentUserService.isOwner(gidai.getUser().getId());
@@ -59,8 +63,8 @@ public class GidaiServiceImpl implements GidaiService {
 	public GidaiUpdateResponse editGidai(Long id, GidaiUpdateRequest request) {
 		// TODO 自動生成されたメソッド・スタブ
 		
-		Gidai gidai = repository.findById(id)
-				  .orElseThrow(() -> new RuntimeException("議題が存在しません"));
+		Gidai gidai = repository.findByIdAndIsDeletedFalse(id)
+				  .orElseThrow(() -> new RuntimeException("議題が存在しません(ID:\" + id + \")"));
 		
 		mapper.updateEntity(gidai, request);
 		
@@ -69,12 +73,6 @@ public class GidaiServiceImpl implements GidaiService {
 		boolean editable = currentUserService.isOwner(gidai.getUser().getId());
 		GidaiUpdateResponse response = mapper.toUpdateResponse(gidai, editable);
 		return response;
-	}
-
-	@Override
-	public void deleteGidai(Long id) {
-		// TODO 自動生成されたメソッド・スタブ
-		
 	}
 
 }

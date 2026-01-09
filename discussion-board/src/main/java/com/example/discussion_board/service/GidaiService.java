@@ -37,10 +37,4 @@ public interface GidaiService {
      * @return 更新後のGidaiResponse
      */
     GidaiUpdateResponse editGidai(Long id, GidaiUpdateRequest request);
-
-    /**
-     * 議題を削除
-     * @param id 削除対象の議題ID
-     */
-    void deleteGidai(Long id);
 }

@@ -10,8 +10,8 @@ import com.example.discussion_board.entity.User;
 import com.example.discussion_board.model.Genre;
 
 @Repository
-public interface GidaiRepository extends JpaRepository<Gidai, Long> {	
-	List<Gidai> findByIsDeletedFalse();
+public interface GidaiRepository extends JpaRepository<Gidai, Long> {
+	List<Gidai> findAllByIsDeletedFalse();
 	Optional<Gidai> findByIdAndIsDeletedFalse(Long Id);
 	List<Gidai> findByGenreAndIsDeletedFalse(Genre Genre);
 	List<Gidai> findByUserAndIsDeletedFalse(User user);

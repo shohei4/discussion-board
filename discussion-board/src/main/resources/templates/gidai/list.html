@@ -75,6 +75,7 @@
 	            // ★ 自前のfetchWithRefreshを消して、共通のauthenticatedFetchを使う
 	            const response = await authenticatedFetch('/api/gidai');
 	            
+	            // 1. レスポンスが正常でない場合
 	            if (!response.ok) {
 	                throw new Error('データの取得に失敗しました');
 	            }

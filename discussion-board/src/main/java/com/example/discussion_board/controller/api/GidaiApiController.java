@@ -34,14 +34,13 @@ public class GidaiApiController {
 	private final UserService userService;
 	
 	@GetMapping
-	public ResponseEntity<List<GidaiResponse>> getAll() {
+	public ResponseEntity<?> getAll() {
 		List<GidaiResponse> gidaiList = gidaiService.findAllGidai();
-		
 		return ResponseEntity.ok(gidaiList);
 	}
 	
 	@GetMapping("{id}")
-	public ResponseEntity<GidaiUpdateResponse> getById(@PathVariable Long id) {
+	public ResponseEntity<?> getById(@PathVariable Long id) {
 		GidaiUpdateResponse response = gidaiService.findByIdGidai(id);
 		return ResponseEntity.ok(response);
 	}
@@ -51,9 +50,7 @@ public class GidaiApiController {
 		User user = userService.getUserEntityById(userDetails.getId());
 		GidaiResponse createdGidai = gidaiService.createGidai(request, user);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-				.path("{id}")
-				.buildAndExpand(createdGidai.getId())
-				.toUri();
+				.path("/{id}").buildAndExpand(createdGidai.getId()).toUri();
 		return ResponseEntity.created(location).body(createdGidai);
 	}
 	

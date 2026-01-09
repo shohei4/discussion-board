@@ -102,7 +102,7 @@
 				const updatedGidai = await response.json();
 				alert("更新しました" + updatedGidai.title);
 				
-				location.href = "/view/gidaiList";
+				location.href =`/view/gidai/detail/${gidaiId}`;
 				
 			}catch (err) {
 				alert(err.message);

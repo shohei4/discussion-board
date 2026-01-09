@@ -34,7 +34,7 @@ public class AuthApiController {
         } catch (AuthException e) {
         	return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of(
-                            "error", e.getCode(),
+                            "code", e.getCode(),
                             "message", e.getMessage()
                     ));
         }
