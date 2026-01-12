@@ -11,6 +11,7 @@ import com.example.discussion_board.dto.RefreshTokenWithPlain;
 import com.example.discussion_board.entity.RefreshToken;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.exception.AuthException;
+import com.example.discussion_board.exception.constant.GlobalErrorCode;
 import com.example.discussion_board.repository.RefreshTokenRepository;
 import com.example.discussion_board.repository.UserRepository;
 import com.example.discussion_board.util.HashUtil;
@@ -38,8 +39,7 @@ public class AuthServiceImpl implements AuthService {
         
         //ユーザーパスの照合
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new AuthException(
-                    "invalid_credentials", "メールアドレスまたはパスワードが違います");
+            throw new AuthException(GlobalErrorCode.AUTH_REQUIRED);
         }
         
         //アクセストークン発行
@@ -69,11 +69,11 @@ public class AuthServiceImpl implements AuthService {
     	String hashed = HashUtil.sha256Base64(refreshTokenPlain);
         
         RefreshToken stored = refreshTokenRepository.findByTokenHash(hashed)
-                .orElseThrow(() -> new AuthException("invalid_token", "リフレッシュトークンが無効です"));
+                .orElseThrow(() -> new AuthException(GlobalErrorCode.INVALID_TOKEN));
 
         // ユーザー取得
         User user = userRepository.findById(stored.getUser().getId())
-                .orElseThrow(() -> new AuthException("user_not_found", "ユーザーが存在しません"));
+                .orElseThrow(() -> new AuthException(GlobalErrorCode.USER_NOT_FOUND));
 
         // 新しいアクセストークンを生成
         String newAccessToken = jwtTokenProvider.generateToken(user.getEmail());

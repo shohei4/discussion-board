@@ -12,6 +12,7 @@ import com.example.discussion_board.dto.RefreshTokenWithPlain;
 import com.example.discussion_board.entity.RefreshToken;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.exception.AuthException;
+import com.example.discussion_board.exception.constant.GlobalErrorCode;
 import com.example.discussion_board.repository.RefreshTokenRepository;
 import com.example.discussion_board.util.HashUtil;
 
@@ -64,13 +65,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         String hashed = HashUtil.sha256Base64(plainToken);
 
         RefreshToken token = refreshTokenRepository.findByTokenHash(hashed)
-                .orElseThrow(() -> new AuthException("invalid_token", "リフレッシュトークンが無効です"));
+                .orElseThrow(() -> new AuthException(GlobalErrorCode.INVALID_TOKEN));
 
         if (token.isExpired()) {
-            throw new AuthException("token_expired", "リフレッシュトークンの期限が切れています");
+        	throw new AuthException(GlobalErrorCode.TOKEN_EXPIRED);
         }
         if (token.isUsed() || token.isRevoked()) {
-            throw new AuthException("revoked_token", "リフレッシュトークンは失効済みです");
+        	throw new AuthException(GlobalErrorCode.REVOKED_TOKEN);
         }
 
         return token;
@@ -82,7 +83,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public RefreshTokenWithPlain rotateToken(RefreshToken oldToken) {
         if (oldToken.isUsed() || oldToken.isRevoked() || oldToken.isExpired()) {
-            throw new AuthException("revoked_token", "古いリフレッシュトークンは無効です");
+            throw new AuthException(GlobalErrorCode.REVOKED_OLD_TOKEN);
         }
 
         // 古いトークンを used=true に
@@ -101,7 +102,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         String hashed = HashUtil.sha256Base64(plainToken);
 
         RefreshToken token = refreshTokenRepository.findByTokenHash(hashed)
-                .orElseThrow(() -> new AuthException("invalid_token", "リフレッシュトークンが存在しません"));
+                .orElseThrow(() -> new AuthException(GlobalErrorCode.INVALID_TOKEN));
 
         token.setRevoked(true);
         refreshTokenRepository.save(token);

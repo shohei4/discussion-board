@@ -12,6 +12,7 @@ import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.exception.ResourceNotFoundException;
+import com.example.discussion_board.exception.constant.GlobalErrorCode;
 import com.example.discussion_board.mapper.GidaiMapper;
 import com.example.discussion_board.repository.GidaiRepository;
 import com.example.discussion_board.service.CurrentUserService;
@@ -33,7 +34,7 @@ public class GidaiServiceImpl implements GidaiService {
 		// TODO 自動生成されたメソッド・スタブ
 		List<Gidai> gidaiList = repository.findAllByIsDeletedFalse();
 		if (gidaiList.isEmpty()) {
-	        throw new ResourceNotFoundException("GIDAI_EMPTY", "表示できる議題がありません。");
+	        throw new ResourceNotFoundException(GlobalErrorCode.GIDAI_EMPTY);
 	    }
 		List<GidaiResponse> responseList = mapper.toResponseList(gidaiList);
 		return responseList;
@@ -43,7 +44,7 @@ public class GidaiServiceImpl implements GidaiService {
 	public GidaiUpdateResponse findByIdGidai(Long id) {
 		// TODO 自動生成されたメソッド・スタブ
 		Gidai gidai = repository.findByIdAndIsDeletedFalse(id)
-				.orElseThrow(() -> new RuntimeException("指定の議題が存在しません"));
+				.orElseThrow(() -> new ResourceNotFoundException(GlobalErrorCode.GIDAI_EMPTY));
 		//編集flagの取得
 		boolean editable = currentUserService.isOwner(gidai.getUser().getId());
 		GidaiUpdateResponse response = mapper.toUpdateResponse(gidai, editable)
@@ -64,7 +65,7 @@ public class GidaiServiceImpl implements GidaiService {
 		// TODO 自動生成されたメソッド・スタブ
 		
 		Gidai gidai = repository.findByIdAndIsDeletedFalse(id)
-				  .orElseThrow(() -> new RuntimeException("議題が存在しません(ID:\" + id + \")"));
+				.orElseThrow(() -> new ResourceNotFoundException(GlobalErrorCode.GIDAI_EMPTY));
 		
 		mapper.updateEntity(gidai, request);
 		

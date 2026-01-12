@@ -1,18 +1,18 @@
 package com.example.discussion_board.exception;
 
+import com.example.discussion_board.exception.constant.GlobalErrorCode;
+
 import lombok.Getter;
 
 @Getter
 public class ResourceNotFoundException extends RuntimeException {
 	
-	private final String code;
-	private final String redirectUrl;
+	private final GlobalErrorCode errorCode;
 	
-	public ResourceNotFoundException(String message, String code, String redirectUrl) {
+	public ResourceNotFoundException(GlobalErrorCode errorCode) {
 		// TODO 自動生成されたコンストラクター・スタブ
-		super(message);
-		this.code = code;
-		this.redirectUrl = redirectUrl;
+		super(errorCode.getMessage());
+		this.errorCode = errorCode;
 	}
 
 }
