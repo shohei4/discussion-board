@@ -67,23 +67,18 @@
 		async function loadComments() {
 			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
 
-			const token = sessionStorage.getItem('accessToken');
+			try {
+				const token = sessionStorage.getItem('accessToken');
 
-			const response = await fetch(`${API_BASE}/list/${gidaiId}`, {
-				headers: {
-					"Authorization": `Bearer ${token}`
-				}
-			});
+				const response = await authenticatedFetch(`${API_BASE}/list/${gidaiId}`);
 
-			if (!response.ok) {
-				console.error("一覧取得失敗", response.status);
-				return;
+				const data = await response.json();
+				data.forEach(appendComment);
+
+			} catch (err) {
+				console.error("一覧取得中にエラーが発生しました", err);
 			}
-
-			const data = await response.json();
-			data.forEach(appendComment);
 		}
-
 
 		// モーダルからコメント投稿
 		document.getElementById('submitModalComment').addEventListener("click", async () => {
@@ -101,16 +96,10 @@
 			}
 
 			try {
-				const response = await fetch(`${API_BASE}/save/${gidaiId}`, {
+				const response = await authenticatedFetch(`${API_BASE}/save/${gidaiId}`, {
 					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": `Bearer ${token}`
-					},
 					body: JSON.stringify({comment})
 				});
-
-				if (!response.ok) throw new Error("投稿に失敗しました");
 
 				const data = await response.json();
 				appendComment(data);

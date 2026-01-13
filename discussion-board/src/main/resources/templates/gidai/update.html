@@ -102,7 +102,13 @@
 				const updatedGidai = await response.json();
 				alert("更新しました" + updatedGidai.title);
 				
-				location.href =`/view/gidai/detail/${gidaiId}`;
+				if(payload.isDeleted) {
+					//削除処理された場合は一覧
+					location.href = "/view/gidai/list";
+				}else {
+					location.href =`/view/gidai/detail/${gidaiId}`;
+				}
+				
 				
 			}catch (err) {
 				alert(err.message);

@@ -73,9 +73,13 @@ async function authenticatedFetch(url, options = {}) {
 			//4. awaitを付けて再試行、その結果を返す
 			response = await fetch(url, { ...options, headers: retryHeaders, credentials: 'include' });
 		} else {
-			// リフレッシュ失敗：共通ハンドラーに投げるか、ここで飛ばす
-			window.location.href = '/login?timeout=true';
-			throw new Error("SESSION_EXPIRED");
+			// ★ポイント：リフレッシュに失敗したとき
+            // すでにサーバー側で「失効済みエラー」などのJSONを返せる状態なら、
+            // そのレスポンスを使ってhandleApiErrorを呼ぶのが理想的ですが、
+            // ここではシンプルにログインへ飛ばします。
+			alert("セッションが切れました。再度ログインしてください。");
+            window.location.href = '/login?timeout=true';
+            throw new Error("SESSION_EXPIRED");
 		}
 		// ★ここがポイント：リトライ後も含め、正常（2xx）でなければ共通ハンドラーへ
 		if (!response.ok) {
