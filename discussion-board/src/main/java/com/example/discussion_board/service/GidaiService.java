@@ -7,6 +7,7 @@ import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.dto.GidaiUpdateRequest;
 import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.entity.User;
+import com.example.discussion_board.model.Genre;
 
 public interface GidaiService {
 	
@@ -22,6 +23,13 @@ public interface GidaiService {
      * @return GidaiResponse型
      */
     GidaiUpdateResponse findByIdGidai(Long id);
+    
+    /**
+     * ジャンル検索
+     * @param genre
+     * @return GidaiResponse型のList
+     */
+    List<GidaiResponse> findByGenre(Genre genre);
 
     /**
      * 議題を登録

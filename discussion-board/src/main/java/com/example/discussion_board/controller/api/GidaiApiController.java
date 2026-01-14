@@ -19,6 +19,7 @@ import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.dto.GidaiUpdateRequest;
 import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.entity.User;
+import com.example.discussion_board.model.Genre;
 import com.example.discussion_board.security.CustomUserDetails;
 import com.example.discussion_board.service.GidaiService;
 import com.example.discussion_board.service.UserService;
@@ -43,6 +44,12 @@ public class GidaiApiController {
 	public ResponseEntity<?> getById(@PathVariable Long id) {
 		GidaiUpdateResponse response = gidaiService.findByIdGidai(id);
 		return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("{genre}")
+	public ResponseEntity<?> getByGenre(@PathVariable Genre genre){
+		List<GidaiResponse> gidaiList = gidaiService.findByGenre(genre);
+		return ResponseEntity.ok(gidaiList);
 	}
 	
 	@PostMapping

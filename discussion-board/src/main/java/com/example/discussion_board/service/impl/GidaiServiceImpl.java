@@ -14,6 +14,7 @@ import com.example.discussion_board.entity.User;
 import com.example.discussion_board.exception.ResourceNotFoundException;
 import com.example.discussion_board.exception.constant.GlobalErrorCode;
 import com.example.discussion_board.mapper.GidaiMapper;
+import com.example.discussion_board.model.Genre;
 import com.example.discussion_board.repository.GidaiRepository;
 import com.example.discussion_board.service.CurrentUserService;
 import com.example.discussion_board.service.GidaiService;
@@ -49,6 +50,17 @@ public class GidaiServiceImpl implements GidaiService {
 		boolean editable = currentUserService.isOwner(gidai.getUser().getId());
 		GidaiUpdateResponse response = mapper.toUpdateResponse(gidai, editable)
 ;		return response;
+	}
+	
+	@Override
+	public List<GidaiResponse> findByGenre(Genre genre) {
+		// TODO 自動生成されたメソッド・スタブ
+		List<Gidai> gidaiList = repository.findByGenreAndIsDeletedFalse(genre);
+		if (gidaiList.isEmpty()) {
+	        throw new ResourceNotFoundException(GlobalErrorCode.GIDAI_EMPTY);
+	    }
+		List<GidaiResponse> responseList = mapper.toResponseList(gidaiList);
+		return responseList;
 	}
 
 
