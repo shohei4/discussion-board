@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<body>
+
+	<nav th:fragment="main-nav" class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+		<div class="container-fluid">
+			<a class="navbar-brand fw-bold" th:href="@{/view/gidai/list}">議論アプリ(仮)</a>
+
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler"
+				aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+
+			<div class="collapse navbar-collapse" id="navbarToggler">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{/view/gidai/list}">議題一覧</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" th:href="@{/view/gidai/registration}">議題投稿</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link text-warning" th:href="@{/view/gidai/detail}">ログアウト</a>
+					</li>
+				</ul>
+
+				<form class="d-flex align-items-center" th:action="@{/api/gidai/list}" method="get">
+					<select name="genre" class="form-select me-2" style="width: auto; min-width: 140px;">
+						<option value="" selected>全ジャンル</option>
+						<option th:each="genre : ${T(com.example.discussion_board.model.Genre).values()}"
+							th:value="${genre.name()}" th:text="${genre.label}">ジャンル</option>
+					</select>
+
+					<input class="form-control me-2" type="search" name="keyword" placeholder="キーワードを入力..."
+						aria-label="Search">
+
+					<button class="btn btn-outline-light" type="submit">検索</button>
+				</form>
+			</div>
+		</div>
+	</nav>
+
+</body>
+
+</html>
