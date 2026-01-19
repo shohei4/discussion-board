@@ -46,7 +46,7 @@ public class GidaiApiController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@GetMapping("{genre}")
+	@GetMapping("/genre/{genre}")
 	public ResponseEntity<?> getByGenre(@PathVariable Genre genre){
 		List<GidaiResponse> gidaiList = gidaiService.findByGenre(genre);
 		return ResponseEntity.ok(gidaiList);
