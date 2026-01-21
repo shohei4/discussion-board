@@ -74,12 +74,12 @@ async function authenticatedFetch(url, options = {}) {
 			response = await fetch(url, { ...options, headers: retryHeaders, credentials: 'include' });
 		} else {
 			// ★ポイント：リフレッシュに失敗したとき
-            // すでにサーバー側で「失効済みエラー」などのJSONを返せる状態なら、
-            // そのレスポンスを使ってhandleApiErrorを呼ぶのが理想的ですが、
-            // ここではシンプルにログインへ飛ばします。
+			// すでにサーバー側で「失効済みエラー」などのJSONを返せる状態なら、
+			// そのレスポンスを使ってhandleApiErrorを呼ぶのが理想的ですが、
+			// ここではシンプルにログインへ飛ばします。
 			alert("セッションが切れました。再度ログインしてください。");
-            window.location.href = '/login?timeout=true';
-            throw new Error("SESSION_EXPIRED");
+			window.location.href = '/login?timeout=true';
+			throw new Error("SESSION_EXPIRED");
 		}
 		// ★ここがポイント：リトライ後も含め、正常（2xx）でなければ共通ハンドラーへ
 		if (!response.ok) {
@@ -89,4 +89,23 @@ async function authenticatedFetch(url, options = {}) {
 	}
 
 	return response;
+}
+
+// navbar用のログアウト外部関数
+document.addEventListener('click', (e) => {
+	// IDで判定する「イベント委譲」という手法
+	if (e.target && e.target.id === 'logout-button') {
+		handleLogout();
+	}
+});
+
+async function handleLogout() {
+	try {
+		await authenticatedFetch('/logout', { method: 'POST', skipRefresh: true });
+	} catch (error) {
+		console.warn(error);
+	} finally {
+		sessionStorage.removeItem('accessToken');
+		window.location.href = '/view/login?logout=true';
+	}
 }
