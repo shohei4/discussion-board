@@ -18,17 +18,20 @@
                 <div class="mb-3">
                     <label for="username" class="form-label">名前</label>
                     <input type="text" class="form-control" id="username" name="username" placeholder="名前を入力" required>
+                	<div class="invalid-feedback">2文字以上で入力してください</div>
                 </div>
 
                 <div class="mb-3">
                     <label for="email" class="form-label">メール</label>
                     <input type="email" class="form-control" id="email" name="email" placeholder="example@mail.com" required>
-                </div>
+                	<div class="invalid-feedback">正しいメール形式で入力してください</div>
+				</div>
 
                 <div class="mb-3">
                     <label for="password" class="form-label">パスワード</label>
                     <input type="password" class="form-control" id="password" name="password" placeholder="パスワードを入力" required>
-                </div>
+                	<div class="invalid-feedback"></div>	
+				</div>
 
                 <div class="d-grid">
                     <button type="button" class="btn btn-primary" onclick="submitForm()">登録</button>

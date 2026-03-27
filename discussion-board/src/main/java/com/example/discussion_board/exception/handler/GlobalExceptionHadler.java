@@ -1,6 +1,10 @@
 package com.example.discussion_board.exception.handler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -42,5 +46,27 @@ public class GlobalExceptionHadler {
 						));
 	}
 	 
-
+	//入力バリデーション用のハンドラー
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+		
+		Map<String, String> errors = new HashMap<>();
+		
+		ex.getBindingResult().getFieldErrors().forEach(
+				error -> {
+					errors.put(
+							error.getField(),
+							error.getDefaultMessage()
+							);
+				}
+				);
+		
+		 ErrorResponse response = new ErrorResponse(
+		            "VALIDATION_ERROR",
+		            "入力値に誤りがあります",
+		            errors
+		    );
+		 
+		 return ResponseEntity.badRequest().body(response);
+	}	
 }

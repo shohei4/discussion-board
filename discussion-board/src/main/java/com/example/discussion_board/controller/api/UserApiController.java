@@ -17,6 +17,7 @@ import com.example.discussion_board.dto.UserRequest;
 import com.example.discussion_board.dto.UserResponse;
 import com.example.discussion_board.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -39,7 +40,7 @@ public class UserApiController {
 	}
 
 	@PostMapping
-	public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
+	public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
 		UserResponse createdUser = userService.createUser(request);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 				.path("/{id}")

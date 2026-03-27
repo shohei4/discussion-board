@@ -2,14 +2,18 @@ package com.example.discussion_board.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,32 +33,26 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true, length = 50)
+	@Column(nullable = false, unique = true, length = 30)
+	@NotBlank(message = "ユーザー名は必須です")
+	@Size(min = 3, max = 30, message = "ユーザー名は３から３０文字以内で入力してください")
 	private String username;
 
-	@Column(nullable = false, unique = true, length = 100)
+	@Column(nullable = false, unique = true, length = 254)
+	@NotBlank(message = "メールアドレスは必須です")
+	@Email(message = "正しいメールアドレスを入力してください")
 	private String email;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 255)
+	@NotBlank(message = "パスワードは必須です")
+	@Size(min = 8, max = 100, message = "パスワードは8文字以上で入力してください")
 	private String password;
 
-	@Column(name = "created_at", nullable = false, updatable = false)
+	@CreationTimestamp
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
-	@Column(name = "updated_at")
+	@UpdateTimestamp
 	private LocalDateTime updatedAt;
-
-	//登録時に自動で日付を設定
-	@PrePersist
-	public void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
-
-	//更新時に自動で日付を設定
-	@PreUpdate
-	public void onUpdate() {
-		this.updatedAt = LocalDateTime.now();
-	}
 
 }
