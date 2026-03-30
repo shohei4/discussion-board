@@ -19,6 +19,7 @@ import com.example.discussion_board.exception.AuthException;
 import com.example.discussion_board.exception.constant.GlobalErrorCode;
 import com.example.discussion_board.security.AuthService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,7 +30,7 @@ public class LoginApiController {
 	private final AuthService authService;
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+	public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
 		try {
 			// 1. 認証
 			String email = request.getEmail();
