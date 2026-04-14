@@ -6,6 +6,8 @@
 	<title>ユーザー登録</title>
 	<!-- Bootstrap 5 -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="/js/UserValidator.js"></script>
+	<script src="/js/utils.js"></script>
 </head>
 
 <body class="bg-light">
@@ -20,14 +22,14 @@
 				<div class="mb-3">
 					<label for="username" class="form-label">名前</label>
 					<input type="text" class="form-control" id="username" name="username" placeholder="名前を入力" required>
-					<div class="invalid-feedback">2文字以上で入力してください</div>
+					<div class="invalid-feedback"></div>
 				</div>
 
 				<div class="mb-3">
 					<label for="email" class="form-label">メールアドレス</label>
 					<input type="email" class="form-control" id="email" name="email" placeholder="example@mail.com"
 						required>
-					<div class="invalid-feedback">正しいメール形式で入力してください</div>
+					<div class="invalid-feedback"></div>
 				</div>
 
 				<div class="mb-3">
@@ -57,31 +59,6 @@
 	<script>
 		console.log("msg after redirect:", sessionStorage.getItem("successMessage"));
 
-		//バリデーションチェックmethod
-		function validateForm(data) {
-			if (!data.username || data.username.length < 3 || data.username.length > 30) {
-				return "ユーザー名は3〜30文字で入力してください";
-			}
-
-			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-			if (!data.email || !emailRegex.test(data.email)) {
-				return "正しいメール形式で入力してください";
-			}
-
-			if (!data.password || data.password.length < 8) {
-				return "パスワードは8文字以上で入力してください";
-			}
-
-			return null;
-		}
-		
-		//エラーメッセージ表示メソッド
-		function showMessage(text, isError = true) {
-		    const messageDiv = document.getElementById('message');
-		    messageDiv.className = `mt-3 text-center fw-bold ${isError ? 'text-danger' : 'text-success'}`;
-		    messageDiv.innerText = text;
-		}
-
 		async function submitForm() {
 			//データ取得
 			const data = {
@@ -91,11 +68,11 @@
 			};
 
 			//バリデーション実行
-			const error = validateForm(data);
+			const errors = validateForm(data, rules);
+			console.log(errors);
 
-			if (error) {
-				showMessage(error.message);
-				document.getElementById(error.field).focus(); 
+			if (Object.keys(errors).length > 0) {
+				showFieldErrors(errors);
 				return;
 			}
 
@@ -114,8 +91,14 @@
 					sessionStorage.setItem('successMessage', "登録成功");
 					window.location.href = '/view/login';
 				} else {
-					// エラーは登録画面で表示する場合は必要
-					showMessage(`登録に失敗しました (${response.status})`)
+					const result = await response.json(); //レスポンスボディを取得
+
+					if (result.errors) {
+						showFieldErrors(result.errors);//フィールドエラーを表示
+					} else {
+						// エラーは登録画面で表示する場合は必要
+						showMessage(result.message || '登録に失敗しました');
+					}
 				}
 			} catch (error) {
 				showMessage('通信エラーが発生しました');
