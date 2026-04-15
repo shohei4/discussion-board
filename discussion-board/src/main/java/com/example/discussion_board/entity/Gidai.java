@@ -2,6 +2,9 @@ package com.example.discussion_board.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.example.discussion_board.model.Genre;
 
 import jakarta.persistence.Column;
@@ -14,8 +17,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,22 +55,10 @@ public class Gidai {
 	@Builder.Default
 	private Boolean isDeleted = false;
 
-	@Column(name = "created_at", nullable = false, updatable = false)
+	@CreationTimestamp
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
-	
-	@Column(name = "updated_at")
+
+	@UpdateTimestamp
 	private LocalDateTime updatedAt;
-
-	//登録時に日時を自動設定
-	@PrePersist
-	public void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-	}
-
-	//更新時に自動で日付を設定
-	@PreUpdate
-	public void onUpdate() {
-		this.updatedAt = LocalDateTime.now();
-	}
 }

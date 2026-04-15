@@ -1,6 +1,5 @@
 package com.example.discussion_board.security;
 
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +34,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new AuthException(GlobalErrorCode.LOGIN_FAILED));
         
         //ユーザーパスの照合
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new AuthException(GlobalErrorCode.AUTH_REQUIRED);
+            throw new AuthException(GlobalErrorCode.LOGIN_FAILED);
         }
         
         //アクセストークン発行

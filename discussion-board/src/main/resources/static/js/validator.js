@@ -13,7 +13,21 @@ const rules = {
 	password: (v) => {
 		if (!v || v.length < 8)
 			return "パスワードは8文字以上で入力してください";
-	}
+	},
+	
+	// --- 議題フォーム ---
+    title: (v) => {
+        if (!v || v.trim() === "")
+            return "タイトルは必須です";
+        if (v.length > 100)
+            return "タイトルは100文字以内で入力してください";
+    },
+    body: (v) => {
+        if (!v || v.trim() === "")
+            return "本文は必須です";
+        if (v.length > 1000)
+            return "本文は1000文字以内で入力してください";
+    }
 }
 
 /**

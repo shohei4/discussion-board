@@ -24,6 +24,7 @@ import com.example.discussion_board.security.CustomUserDetails;
 import com.example.discussion_board.service.GidaiService;
 import com.example.discussion_board.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -53,7 +54,7 @@ public class GidaiApiController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<GidaiResponse> createGidai(@RequestBody GidaiRegistrationRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+	public ResponseEntity<GidaiResponse> createGidai(@Valid @RequestBody GidaiRegistrationRequest request, @AuthenticationPrincipal CustomUserDetails userDetails) {
 		User user = userService.getUserEntityById(userDetails.getId());
 		GidaiResponse createdGidai = gidaiService.createGidai(request, user);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
