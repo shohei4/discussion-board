@@ -78,7 +78,7 @@ async function authenticatedFetch(url, options = {}) {
 			// そのレスポンスを使ってhandleApiErrorを呼ぶのが理想的ですが、
 			// ここではシンプルにログインへ飛ばします。
 			alert("セッションが切れました。再度ログインしてください。");
-			window.location.href = '/login?timeout=true';
+			window.location.href = '/view/login?timeout=true';
 			throw new Error("SESSION_EXPIRED");
 		}
 		// ★ここがポイント：リトライ後も含め、正常（2xx）でなければ共通ハンドラーへ

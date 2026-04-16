@@ -18,7 +18,7 @@ function showFieldErrors(errors) {
 	// エラー反映
 	for (const field in errors) {
 		const input = document.getElementById(field);
-		const feedback = input.nextElementSibling;　　//inputの隣の要素を取得（エラーメッセージの表示場所を確保）
+		const feedback = input.nextElementSibling; //inputの隣の要素を取得（エラーメッセージの表示場所を確保）
 
 		if (input) input.classList.add("is-invalid");
 		if (feedback) feedback.innerText = errors[field];
