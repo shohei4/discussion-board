@@ -34,7 +34,7 @@ async function authenticatedFetch(url, options = {}) {
 		} else {
 			// リフレッシュも不可＝完全に未ログイン
 			alert("ログインが必要です");
-			window.location.href = '/login?timeout=true';
+			window.location.href = '/view/login?timeout=true';
 			// 処理を中断させるためにエラーを投げるか、空のレスポンスを返す
 			throw new Error("Authentication required");
 		}
