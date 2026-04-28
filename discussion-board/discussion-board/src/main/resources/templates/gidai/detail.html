@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Insert title here</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+	<div class="container my-5">
+
+		<!-- 議題カード -->
+		<div class="card shadow-sm mb-4">
+			<div class="card-body">
+
+				<!-- タイトル -->
+				<h2 id="title" class="card-title fw-bold mb-3">
+					議題タイトル
+				</h2>
+
+				<!-- 本文 -->
+				<p id="body" class="card-text fs-5 mb-4">
+					本文
+				</p>
+
+				<!-- 作成者 -->
+				<p class="text-muted mb-4">
+					作成者：
+					<span id="username" class="fw-semibold"></span>
+				</p>
+
+				<!-- 操作ボタン -->
+				<div class="d-flex gap-2">
+					<a id="EditGidaiLink" class="btn btn-outline-warning">
+						<i class="bi bi-pencil-square"></i> 編集
+					</a>
+
+					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentModal">
+						<i class="bi bi-chat-dots"></i> コメント投稿
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- 議題ID（JS用） -->
+		<div id="gidai-data" th:data-gidai-id="${gidaiId}"></div>
+
+		<!-- コメント一覧 -->
+		<div class="card shadow-sm">
+			<div class="card-header bg-light fw-bold">
+				議論コメント
+			</div>
+
+			<div id="commentList" class="list-group list-group-flush">
+				<!-- JSでコメント追加 -->
+			</div>
+		</div>
+
+	</div>
+
+	<!-- コメント投稿モーダル -->
+	<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="commentModalLabel">コメント投稿</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+				</div>
+				<div class="modal-body">
+					<textarea id="modalComment" class="form-control" rows="3" placeholder="コメントを入力"></textarea>
+					<div id="modalMessage" class="text-danger fw-bold mt-2"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+					<button type="button" class="btn btn-primary" id="submitModalComment">投稿</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="/js/apiClient.js"></script>
+	<script>
+		const API_BASE = "http://localhost:8080/api/discussion"
+		//DOMからgidaiIdを取得
+		const gidaiId = document.getElementById('gidai-data')?.dataset.gidaiId;
+		console.log("チェック - IDの中身:", gidaiId); // ←ここで undefined が出たらHTML側の属性名ミスです
+
+		//議題取得メソッド
+		async function loadGidaiResponse(gidaiId) {
+			const response = await authenticatedFetch(`/api/gidai/${gidaiId}`); // 認証付きfetch
+			if (!response.ok) return;
+			return await response.json();
+		}
+
+		//議題表示method
+		function renderGidaiResponse(gidaiResponse) {
+			document.getElementById('title').innerText = gidaiResponse.title;
+			document.getElementById('body').innerText = gidaiResponse.body;
+			document.getElementById('username').innerText = gidaiResponse.userSummary.username
+
+			// 2. 編集ボタンの制御
+			const editBtn = document.getElementById('EditGidaiLink');
+			
+			
+			// 自分の投稿かどうかで「表示・非表示」と「リンク先」を切り替える
+			if (gidaiResponse.editable == true) {
+				editBtn.href = `/view/gidai/update/${gidaiResponse.id}`;
+				editBtn.style.display = 'inline-block'; // 自分のなら表示
+			} else {
+				editBtn.style.display = 'none'; // 他人のなら隠す
+			}
+		}
+
+		//コメントDOM追加メソッド
+		function appendComment(item) {
+			const list = document.getElementById('commentList');
+			const div = document.createElement('div');
+			div.className = "list-group-item comment-item";
+			div.dataset.commentId = item.id;
+
+			// ★ 届いているデータに合わせて item.liked を使う
+			const btnClass = item.liked ? 'btn-primary' : 'btn-outline-primary';
+
+			div.innerHTML = `
+		    <strong>${item.userSummary.username}</strong>
+		    <br>${item.comment}
+		    <br><small>${item.createdAt}</small>
+		    <button class="like-toggle-btn btn btn-sm ${btnClass} mt-2">
+		        👍 いいね <span class="like-count">${item.likeCount || 0}</span>
+		    </button>
+		    `;
+			list.prepend(div);
+		}
+
+		//画面表示時の処理
+		document.addEventListener("DOMContentLoaded", async () => {
+			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+			const [gidaiItemResponse, discussionItemResponses] = await Promise.all([
+				loadGidaiResponse(gidaiId),
+				loadComments(gidaiId)
+			]);
+
+			renderGidaiResponse(gidaiItemResponse);
+			discussionItemResponses.forEach(appendComment);
+
+			const modalEl = document.getElementById('commentModal');
+			modalEl.addEventListener('shown.bs.modal', () => {
+				document.getElementById('modalComment').focus();
+			});
+		});
+
+		//コメント一覧表示
+		async function loadComments(gidaiId) {
+			const response = await authenticatedFetch(`${API_BASE}/list/${gidaiId}`);
+			if (!response.ok) return [];
+			return await response.json();
+		}
+
+		// モーダルからコメント投稿
+		document.getElementById('submitModalComment').addEventListener("click", async () => {
+			const comment = document.getElementById('modalComment').value;
+			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+			const token = sessionStorage.getItem('accessToken');
+
+			if (!token) {
+				document.getElementById('modalMessage').innerText = "ログインが必要です";
+				return;
+			}
+			if (!comment) {
+				document.getElementById('modalMessage').innerText = "コメントを入力してください";
+				return;
+			}
+
+			try {
+				//POSTリクエスト
+				const response = await authenticatedFetch(`${API_BASE}/save/${gidaiId}`, {
+					method: "POST",
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify({comment})
+				});
+				if (!response.ok) throw new Error("投稿に失敗しました");
+
+				const data = await response.json();
+				appendComment(data);
+
+				document.getElementById('modalComment').value = "";
+				document.getElementById('modalMessage').innerText = "";
+
+				// モーダルを閉じる
+				const modal = bootstrap.Modal.getInstance(document.getElementById('commentModal'));
+				modal.hide();
+
+			} catch (err) {
+				document.getElementById('modalMessage').innerText = err.message;
+			}
+		});
+
+		//トグル処理関数
+		async function toggleStatus(id, btnElement) {
+			//二重クリック防止
+			btnElement.disabled = true;
+
+			try {
+				//1. APIリクエスト
+				const response = await authenticatedFetch(`/api/like/toggle/${id}`, {
+					method: "POST"
+				});
+				if (!response.ok) throw new Error('処理に失敗しました');
+
+				//2. サーバーから返ってきた最新のステータスを取得
+				const data = await response.json();
+
+				//3. UIのトグル処理
+				//いいね数の表示位置の指定のない場合の処理
+				const countSpan = btnElement.querySelector('.like-count');
+				if (countSpan && data.likeCount !== undefined) {
+					countSpan.innerText = data.likeCount;
+				}
+				//Bootstrapのクラスを入れ替えて色を変える(jsonの仕様によりisLikedをlikedに変更)
+				if (data.liked) {
+					btnElement.classList.replace('btn-outline-primary', 'btn-primary');
+				} else {
+					btnElement.classList.replace('btn-primary', 'btn-outline-primary');
+				}
+
+			} catch {
+				console.error('Error:', error);
+				alert('ログインが必要か、通信エラーが発生しました。');
+			} finally {
+				//4. ボタンの再度有効化
+				btnElement.disabled = false;
+			}
+		}
+
+		// ✅ いいねボタンのトグル処理（イベント委譲）
+		document.getElementById('commentList').addEventListener('click', (e) => {
+			// クリックされた要素の近くに「いいねボタン」があるか判定
+			const btn = e.target.closest('.like-toggle-btn');
+
+			if (btn) {
+				// ボタンの親（comment-item）からIDを取得
+				const commentItem = btn.closest('.comment-item');
+				const commentId = commentItem.dataset.commentId;
+
+				// 以前作成した toggleStatus 関数を呼び出す
+				// btn を引数に渡すことで、関数内でボタンの色を変えられるようになります
+				toggleStatus(commentId, btn);
+			}
+		});
+
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
