@@ -9,6 +9,8 @@
 </head>
 
 <body>
+	<!-- ナビバー -->
+	<div th:replace="~{common/navbar2 :: main-nav}"></div>
 	<div class="container my-5">
 
 		<!-- 議題カード -->
@@ -83,8 +85,7 @@
 	<script src="/js/apiClient.js"></script>
 	<script>
 		const API_BASE = "http://localhost:8080/api/discussion"
-		//DOMからgidaiIdを取得
-		const gidaiId = document.getElementById('gidai-data')?.dataset.gidaiId;
+		const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
 		console.log("チェック - IDの中身:", gidaiId); // ←ここで undefined が出たらHTML側の属性名ミスです
 
 		//議題取得メソッド
@@ -121,8 +122,10 @@
 			div.dataset.commentId = item.id;
 
 			// ★ 届いているデータに合わせて item.liked を使う
-			const isLiked = item.likeResult?.isLiked ?? false;
+			//オプショナルチェーンとNull合体演算子の組み合わせ
+			const isLiked = item.likeResult?.liked ?? false;
 			const likeCount = item.likeResult?.likeCount ?? 0;
+			//三項演算子
 			const btnClass = isLiked ? 'btn-primary' : 'btn-outline-primary';
 
 			div.innerHTML = `
@@ -214,6 +217,22 @@
 				//2. サーバーから返ってきた最新のステータスを取得
 				const data = await response.json();
 				
+				//デバック
+				console.log('レスポンス:', data);
+				console.log('ボタンの現在のクラス:', btnElement.className);
+				
+				if (data.liked) {
+				    console.log('いいね ON → btn-primary に変更');
+				    btnElement.classList.remove('btn-outline-primary');
+				    btnElement.classList.add('btn-primary');
+				} else {
+				    console.log('いいね OFF → btn-outline-primary に変更');
+				    btnElement.classList.remove('btn-primary');
+				    btnElement.classList.add('btn-outline-primary');
+				}
+				
+				console.log('変更後のクラス:', btnElement.className);
+
 				//3. UIのトグル処理
 				//いいね数の表示位置の指定のない場合の処理
 				const countSpan = btnElement.querySelector('.like-count');
@@ -221,10 +240,12 @@
 					countSpan.innerText = data.likeCount;
 				}
 				//Bootstrapのクラスを入れ替えて色を変える(jsonの仕様によりisLikedをlikedに変更)
-				if (data.isLiked) {
-					btnElement.classList.replace('btn-outline-primary', 'btn-primary');
+				if (data.liked) {
+					btnElement.classList.remove('btn-outline-primary');
+					btnElement.classList.add('btn-primary');
 				} else {
-					btnElement.classList.replace('btn-primary', 'btn-outline-primary');
+					btnElement.classList.remove('btn-primary');
+					btnElement.classList.add('btn-outline-primary');
 				}
 
 			} catch (error) {
