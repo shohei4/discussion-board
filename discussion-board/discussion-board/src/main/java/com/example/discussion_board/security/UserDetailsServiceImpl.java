@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.discussion_board.entity.User;
+import com.example.discussion_board.exception.AuthException;
+import com.example.discussion_board.exception.constant.GlobalErrorCode;
 import com.example.discussion_board.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new AuthException(GlobalErrorCode.AUTH_REQUIRED));
 
         return CustomUserDetails.builder()
                 .id(user.getId())

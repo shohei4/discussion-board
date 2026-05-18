@@ -3,6 +3,8 @@ package com.example.discussion_board.exception.handler;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -68,5 +70,26 @@ public class GlobalExceptionHadler {
 		    );
 		 
 		 return ResponseEntity.badRequest().body(response);
-	}	
+	}
+	
+	//DB重複制約エラーハンドラー
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ErrorResponse> handleDuplicatekey(DataIntegrityViolationException e) {
+		
+		String message = "登録に失敗しました";
+		
+		if (e.getMessage().contains("user_username_key")) {
+			message = "このユーザー名は既に使用されています";
+		} else if (e.getMessage().contains("users_email_key"))  {
+			message = "このメールアドレスは既に登録されています";
+		}
+		
+		return ResponseEntity
+				.status(HttpStatus.CONFLICT)
+				.body(new ErrorResponse(
+						"DUPLICATION_KEY",
+						message,
+						(String) null
+						));
+	}
 }

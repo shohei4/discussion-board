@@ -17,6 +17,7 @@ import com.example.discussion_board.mapper.DiscussionItemMapper;
 import com.example.discussion_board.repository.DiscussionItemRepository;
 import com.example.discussion_board.repository.GidaiRepository;
 import com.example.discussion_board.repository.UserRepository;
+import com.example.discussion_board.security.CustomUserDetails;
 import com.example.discussion_board.service.CommentLikeService;
 import com.example.discussion_board.service.DiscussionItemService;
 
@@ -43,16 +44,18 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 				discussionItemRepository.findAllByGidaiId(gidaiId)
 					.stream()
 					.map((DiscussionItem item) -> {
-						//いいねカウントの取得
-						Long likeCount = commentLikeService.conuntLikes(item.getId());
-						//いいね状態の取得
-						Boolean isLiked = commentLikeService.getIsLiked(item.getId(), item.getUser().getId());
-						LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
-						
 						//編集flag状態を取得
 						Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 						String  loginUsername = auth.getName();
 						boolean editable = item.getUser().getUsername().equals(loginUsername);
+						
+						//いいねカウントの取得
+						Long likeCount = commentLikeService.conuntLikes(item.getId());
+						//いいね状態の取得
+						//Authenticationから現在のlog inユーザの詳細を取得
+						CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+						Boolean isLiked = commentLikeService.getIsLiked(item.getId(), userDetails.getId());
+						LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
 						
 						DiscussionItemResponse response = DiscussionItemResponse.from(item)								
 								.likeResult(likeResult)

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.discussion_board.config.PermitPath;
+import com.example.discussion_board.exception.AuthException;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -113,6 +114,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	        } catch (JwtException e) {
 	            log.warn("JWT general exception: {}", e.getMessage());
 	            sendUnauthorized(response, "invalid_token", "トークンが不正です");
+	            return;
+	            
+	        } catch (AuthException e) {
+	            log.warn("User not found during JWT auth: {}", e.getMessage());
+	            sendUnauthorized(response, e.getErrorCode().getCode(), e.getErrorCode().getMessage());
 	            return;
 	        }
 
