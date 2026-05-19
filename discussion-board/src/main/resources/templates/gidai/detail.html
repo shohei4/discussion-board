@@ -86,11 +86,10 @@
 	<script>
 		const API_BASE = "http://localhost:8080/api/discussion"
 		const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
-		console.log("チェック - IDの中身:", gidaiId); // ←ここで undefined が出たらHTML側の属性名ミスです
 
 		//議題取得メソッド
 		async function loadGidaiResponse(gidaiId) {
-			const response = await authenticatedFetch(`/api/gidai/${gidaiId}`); // 認証付きfetch
+			const response = await authenticatedFetch(`/api/gidai/${gidaiId}`); 
 			if (!response.ok) return;
 			return await response.json();
 		}
