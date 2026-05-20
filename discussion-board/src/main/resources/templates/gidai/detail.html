@@ -59,6 +59,7 @@
 				<!-- JSでコメント追加 -->
 			</div>
 		</div>
+		<a th:href="@{/view/gidai/list}">議題一覧はこちら</a>
 
 	</div>
 
@@ -122,6 +123,10 @@
 
 			// ★ 届いているデータに合わせて item.liked を使う
 			//オプショナルチェーンとNull合体演算子の組み合わせ
+			/**
+			オプショナルチェーンの役割：null や undefined のときに、undefinedを返しTypeErrorを防ぐ
+			?. の結果が undefined や null になったとき、false
+			**/
 			const isLiked = item.likeResult?.liked ?? false;
 			const likeCount = item.likeResult?.likeCount ?? 0;
 			//三項演算子
@@ -130,7 +135,7 @@
 			div.innerHTML = `
 		    <strong>${item.userSummary.username}</strong>
 		    <br>${item.comment}
-		    <br><small>${item.createdAt}</small>
+		    <br><small>${formatedDateTime(item.createdAt)}</small>
 		    <button class="like-toggle-btn btn btn-sm ${btnClass} mt-2">
 		        👍 いいね <span class="like-count">${likeCount}</span>
 		    </button>
