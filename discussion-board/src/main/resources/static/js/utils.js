@@ -23,6 +23,7 @@ function showFieldErrors(errors) {
 		if (input) input.classList.add("is-invalid");
 		if (feedback) feedback.innerText = errors[field];
 	}
+}
 	
 	// 日時フォーマット統一関数
 function formatDateTime(dateStr) {
@@ -33,5 +34,4 @@ function formatDateTime(dateStr) {
     const hh = String(date.getHours()).padStart(2, '0');
     const mm = String(date.getMinutes()).padStart(2, '0');
     return `${yyyy}/${MM}/${dd} ${hh}:${mm}`;
-}
 }

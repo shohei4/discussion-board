@@ -2,19 +2,20 @@ package com.example.discussion_board.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class GidaiResponse {
 
-	private Long id;
-	private String title;
-	private String body;
-	private String genre;
-	private boolean editable;
-	private UserSummary userSummary;
+    private Long id;
+    private String title;
+    private String body;
+    private String genre;
+    private UserSummary userSummary;
 }
