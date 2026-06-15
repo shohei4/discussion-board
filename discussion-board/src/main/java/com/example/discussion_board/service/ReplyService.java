@@ -4,13 +4,14 @@ import java.util.List;
 
 import com.example.discussion_board.dto.ReplyRequest;
 import com.example.discussion_board.dto.ReplyResponse;
+import com.example.discussion_board.entity.User;
 
 public interface ReplyService {
 	
 	public List<ReplyResponse> findAllReply(Long id);
 	
-	public List<ReplyResponse> saveReply(ReplyRequest reply);
+	public ReplyResponse saveReply(ReplyRequest request,User user,Long comnetId);
 	
-	public List<ReplyResponse> editReply(ReplyRequest reply);
+	public ReplyResponse updateReply(Long replyId, ReplyRequest request);
 	
 } 

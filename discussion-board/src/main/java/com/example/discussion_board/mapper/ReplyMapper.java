@@ -3,9 +3,11 @@ package com.example.discussion_board.mapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import com.example.discussion_board.dto.ReplyRequest;
 import com.example.discussion_board.dto.ReplyResponse;
 import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.Reply;
+import com.example.discussion_board.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,9 +17,14 @@ public class ReplyMapper {
 	
 	private final ModelMapper modelMapper;
 	
+	/**
+	 * レスポンスDTOへの変換メソッド
+	 * @param reply
+	 * @return ReplyResponse
+	 */
 	 public ReplyResponse toResponse(Reply reply) {
 	        User user = reply.getUser();
-	        UserSummary userSummary = new UserSummary(Reply.getUser(),user.getId(), user.getUsername());
+	        UserSummary userSummary = new UserSummary(user.getId(), user.getUsername());
 	        return ReplyResponse.builder()
 	                .id(reply.getId())
 	                .commentId(reply.getCommentId())
@@ -27,4 +34,19 @@ public class ReplyMapper {
 	                .updatedAt(reply.getUpdatedAt())
 	                .build();
 	    }
+	 
+	 /**
+	  * Entityへの変換メソッド
+	  * @param request
+	  * @param user
+	  * @param commentId
+	  * @return Reply
+	  */
+	 public Reply toEntity(ReplyRequest request,User user,Long commentId) {
+		 return Reply.builder()
+				 .commentId(commentId)
+				 .replyComment(request.getReplyComment())
+				 .user(user)
+				 .build();
+	 }
 }
