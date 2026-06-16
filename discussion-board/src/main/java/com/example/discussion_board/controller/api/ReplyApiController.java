@@ -29,13 +29,13 @@ public class ReplyApiController {
 	private final ReplyService replyService;
 	private final UserService userService;
 	
-	@GetMapping("/{commentId}")
+	@GetMapping("/comment/{commentId}")
 	public ResponseEntity<List<ReplyResponse>> findAllReply(@PathVariable Long commentId) {
 		List<ReplyResponse> responses = replyService.findAllReply(commentId);
 		return ResponseEntity.ok(responses);
 	}
 	
-	@PostMapping("/{commentId}")
+	@PostMapping("/comment/{commentId}")
 	public ResponseEntity<ReplyResponse> saveReply(@PathVariable Long commentId,
 			@RequestBody ReplyRequest request, @AuthenticationPrincipal CustomUserDetails loginUser) {
 		User user = userService.getUserEntityById(loginUser.getId());
@@ -45,4 +45,13 @@ public class ReplyApiController {
 		return ResponseEntity.status(HttpStatus.CREATED)
 		        .body(response);
 	}
+	
+	@PostMapping("/{replyId}")
+	public ResponseEntity<ReplyResponse> editReply(@PathVariable Long replyId, @RequestBody ReplyRequest request) {
+		ReplyResponse response = replyService.updateReply(replyId, request);
+		
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(response);
+	}
+	
 }

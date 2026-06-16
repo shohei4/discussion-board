@@ -131,7 +131,18 @@
 			const likeCount = item.likeResult?.likeCount ?? 0;
 			//三項演算子
 			const btnClass = isLiked ? 'btn-primary' : 'btn-outline-primary';
-
+			
+			//返信HTML生成
+			const repliesHTML = (item.replies ?? [])
+				.map(reply => `
+					<div class="ms-4 mt-2 border-start ps-3">
+						<strong>${reply.usrSummary.username}</strong>
+						<br>${reply,replyCommnet}
+						<br><small>${formatDateTime(reply.createdAt)}</small>
+					</div>
+				`)
+				.join('');
+				
 			div.innerHTML = `
 		    <strong>${item.userSummary.username}</strong>
 		    <br>${item.comment}
@@ -167,6 +178,7 @@
 			if (!response.ok) return [];
 			return await response.json();
 		}
+		
 
 		// モーダルからコメント投稿
 		document.getElementById('submitModalComment').addEventListener("click", async () => {

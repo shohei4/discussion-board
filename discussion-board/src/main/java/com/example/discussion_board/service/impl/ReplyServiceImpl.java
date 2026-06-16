@@ -26,7 +26,7 @@ public class ReplyServiceImpl implements ReplyService {
 	@Override
 	public List<ReplyResponse> findAllReply(Long commentId) {
 		// TODO 自動生成されたメソッド・スタブ
-		List<ReplyResponse> responses = repository.findByICommentIdAndsDeletedFalse(commentId)
+		List<ReplyResponse> responses = repository.findByCommentIdAndIsDeletedFalse(commentId)
 		.stream()
 		.map(mapper::toResponse)
 		.collect(Collectors.toList());

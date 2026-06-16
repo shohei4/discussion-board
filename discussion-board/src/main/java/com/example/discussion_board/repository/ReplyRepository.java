@@ -9,6 +9,6 @@ import com.example.discussion_board.entity.Reply;
 
 @Repository
 public interface ReplyRepository extends JpaRepository<Reply, Long>{
-	List<Reply> findByICommentIdAndsDeletedFalse(Long commentId);
+	List<Reply> findByCommentIdAndIsDeletedFalse(Long commentId);
 	
 }

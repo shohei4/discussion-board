@@ -4,13 +4,14 @@ import java.util.List;
 
 import com.example.discussion_board.dto.DiscussionItemRequest;
 import com.example.discussion_board.dto.DiscussionItemResponse;
+import com.example.discussion_board.dto.DiscussionItemWithReplyResponse;
 
 public interface DiscussionItemService {
 	/**
 	 * 特定議題の議論コメントを全件取得
 	 * @return　レスポンスDTO
 	 */
-	List<DiscussionItemResponse> findAllByGidaiId(Long gidaiId); 
+	List<DiscussionItemWithReplyResponse> findAllByGidaiId(Long gidaiId); 
 	
 	/**
 	 * 議論コメントを登録

@@ -1,6 +1,5 @@
 package com.example.discussion_board.mapper;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import com.example.discussion_board.dto.ReplyRequest;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReplyMapper {
 	
-	private final ModelMapper modelMapper;
 	
 	/**
 	 * レスポンスDTOへの変換メソッド

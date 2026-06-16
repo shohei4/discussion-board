@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.discussion_board.dto.DiscussionItemRequest;
 import com.example.discussion_board.dto.DiscussionItemResponse;
+import com.example.discussion_board.dto.DiscussionItemWithReplyResponse;
 import com.example.discussion_board.security.CustomUserDetails;
 import com.example.discussion_board.service.DiscussionItemService;
 
@@ -27,8 +28,8 @@ public class DiscussionApiController {
 	private final DiscussionItemService discussionItemService;
 	
 	@GetMapping("/list/{gidaiId}")
-	public ResponseEntity<List<DiscussionItemResponse>> getAll(@PathVariable Long gidaiId) {
-		List<DiscussionItemResponse> responses = discussionItemService.findAllByGidaiId(gidaiId);
+	public ResponseEntity<List<DiscussionItemWithReplyResponse>> getAll(@PathVariable Long gidaiId) {
+		List<DiscussionItemWithReplyResponse> responses = discussionItemService.findAllByGidaiId(gidaiId);
 		return ResponseEntity.ok(responses);
 	}
 	

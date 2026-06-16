@@ -9,11 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.discussion_board.dto.DiscussionItemRequest;
 import com.example.discussion_board.dto.DiscussionItemResponse;
+import com.example.discussion_board.dto.DiscussionItemWithReplyResponse;
+import com.example.discussion_board.dto.GidaiSummary;
 import com.example.discussion_board.dto.LikeResultResponse;
+import com.example.discussion_board.dto.ReplyResponse;
+import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.DiscussionItem;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.mapper.DiscussionItemMapper;
+import com.example.discussion_board.mapper.ReplyMapper;
 import com.example.discussion_board.repository.DiscussionItemRepository;
 import com.example.discussion_board.repository.GidaiRepository;
 import com.example.discussion_board.repository.UserRepository;
@@ -34,13 +39,14 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 	private final GidaiRepository gidaiRepository;
 	private final DiscussionItemMapper discussionItemMapper;
 	private final CommentLikeService commentLikeService;
+	private final ReplyMapper replyMapper;
 	
 	@Override
-	public List<DiscussionItemResponse> findAllByGidaiId(Long gidaiId) {
+	public List<DiscussionItemWithReplyResponse> findAllByGidaiId(Long gidaiId) {
 		// TODO 自動生成されたメソッド・スタブ
 		
 		//議論コメントレスポンスのビルド
-		List<DiscussionItemResponse> responses = 
+		List<DiscussionItemWithReplyResponse> responses = 
 				discussionItemRepository.findAllByGidaiId(gidaiId)
 					.stream()
 					.map((DiscussionItem item) -> {
@@ -57,10 +63,24 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 						Boolean isLiked = commentLikeService.getIsLiked(item.getId(), userDetails.getId());
 						LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
 						
-						DiscussionItemResponse response = DiscussionItemResponse.from(item)								
-								.likeResult(likeResult)
-								.editable(editable)
-								.build();
+						List<ReplyResponse> replies =
+						        item.getReplies()
+						            .stream()
+						            .map(replyMapper::toResponse)
+						            .toList();
+						
+						DiscussionItemWithReplyResponse response =
+						        DiscussionItemWithReplyResponse.builder()
+						            .id(item.getId())
+						            .comment(item.getComment())
+						            .userSummary(UserSummary.from(item.getUser()))
+						            .gidaiSummary(GidaiSummary.from(item.getGidai()))
+						            .createdAt(item.getCreatedAt().toString())
+						            .updatedAt(item.getUpdatedAt().toString())
+						            .replies(replies)
+						            .likeResult(likeResult)
+						            .editable(editable)
+						            .build();
 						return response;
 					})
 					.toList();

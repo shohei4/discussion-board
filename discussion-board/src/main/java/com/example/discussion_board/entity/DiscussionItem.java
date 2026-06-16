@@ -1,6 +1,7 @@
 package com.example.discussion_board.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -37,6 +39,9 @@ public class DiscussionItem {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name = "reply_id")
+	private List<Reply> replies;
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 	@Column
