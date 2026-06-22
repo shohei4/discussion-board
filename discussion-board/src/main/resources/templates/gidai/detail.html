@@ -135,9 +135,13 @@
 		}
 
 		//コメントDOM追加メソッド
-		function appendComment(item) {
+		async function appendComment(item) {
+			//でバック
+			console.log("item =", item);
+
 			const list = document.getElementById('commentList');
 			const div = document.createElement('div');
+			//返信取得
 			div.className = "list-group-item comment-item";
 			div.dataset.commentId = item.id;
 
@@ -153,20 +157,24 @@
 			const btnClass = isLiked ? 'btn-primary' : 'btn-outline-primary';
 
 			//返信HTML生成
-			const repliesHTML = (item.replies ?? [])
+			const replies = item.replies ?? [];
+
+			const repliesHTML = replies
 				.map(reply => `
-					<div class="ms-4 mt-2 border-start ps-3">
-						<strong>${reply.usrSummary.username}</strong>
-						<br>${reply, replyCommnet}
-						<br><small>${formatDateTime(reply.createdAt)}</small>
-					</div>
-				`)
+							<div clas="ms-4 mt-2 border-start ps-3">
+								<strong>${reply.userSummary.username}</strong>
+								<br>${reply.replyComment}
+								<br><small>${formatDateTime(reply.createdAt)}</small>
+							</div>
+							`
+				)
 				.join('');
 
 			div.innerHTML = `
 		    <strong>${item.userSummary.username}</strong>
 		    <br>${item.comment}
 		    <br><small>${formatDateTime(item.createdAt)}</small>
+			
 			<div class="d-flex gap-2 align-items-center">
 				<button class="like-toggle-btn btn btn-sm ${btnClass}">
 					        👍 いいね <span class="like-count">${likeCount}</span>
@@ -180,6 +188,11 @@
 					<i class="bi bi-chat-dots"></i> 返信
 				</button>
 			</div>
+			
+			<!-- 返信一覧 -->
+			<div class="reply-container">
+			       ${repliesHTML}
+			</div>
 		   
 		    `;
 			console.log(typeof formatDateTime)
@@ -191,7 +204,7 @@
 			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
 			const [gidaiItemResponse, discussionItemResponses] = await Promise.all([
 				loadGidaiResponse(gidaiId),
-				loadComments(gidaiId)
+				loadComments(gidaiId),
 			]);
 
 			renderGidaiResponse(gidaiItemResponse);
@@ -209,14 +222,6 @@
 			if (!response.ok) return [];
 			return await response.json();
 		}
-		
-		//返信一覧表示method
-		async function loadReplies(CurrentCommentId) {
-			const response = await authenticatedFetch(`http://localhost:8080/api/reply/comment/{commentId}`);
-			if (!response.ok) return [];
-			return await response.json();
-		}
-
 
 		// モーダルからコメント投稿
 		document.getElementById('submitModalComment').addEventListener("click", async () => {
@@ -339,27 +344,8 @@
 					currentCommentId = btn.dataset.commentId;
 				}
 			});
-			
-			document.getElementById('submitModalReply')
-			    .addEventListener('click', async () => {
-			
-			        alert("currentCommentId = " + currentCommentId);
-			
-			        const replyComment =
-			            document.getElementById('modalReply').value;
-			
-			        await authenticatedFetch(`/api/reply/comment/${currentCommentId}`, {
-			            method: 'POST',
-			            headers: {
-			                'Content-Type': 'application/json'
-			            },
-			            body: JSON.stringify({
-			                replyComment: replyComment
-			            })
-			        });
-			    });
 
-		/**返信投稿処理
+		//返信投稿処理
 		console.log(document.getElementById('submitModalReply'));
 		document.getElementById('submitModalReply')
 			.addEventListener('click', async () => {
@@ -377,7 +363,7 @@
 					})
 				});
 			});
-		**/
+
 	</script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
