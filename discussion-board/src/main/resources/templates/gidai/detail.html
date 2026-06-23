@@ -138,6 +138,7 @@
 		async function appendComment(item) {
 			//でバック
 			console.log("item =", item);
+			console.log("replies =", item.replies);
 
 			const list = document.getElementById('commentList');
 			const div = document.createElement('div');
@@ -161,7 +162,7 @@
 
 			const repliesHTML = replies
 				.map(reply => `
-							<div clas="ms-4 mt-2 border-start ps-3">
+							<div class="ms-4 mt-2 border-start ps-3">
 								<strong>${reply.userSummary.username}</strong>
 								<br>${reply.replyComment}
 								<br><small>${formatDateTime(reply.createdAt)}</small>

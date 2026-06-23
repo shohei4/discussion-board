@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.example.discussion_board.dto.ReplyRequest;
 import com.example.discussion_board.dto.ReplyResponse;
 import com.example.discussion_board.dto.UserSummary;
+import com.example.discussion_board.entity.DiscussionItem;
 import com.example.discussion_board.entity.Reply;
 import com.example.discussion_board.entity.User;
 
@@ -25,7 +26,6 @@ public class ReplyMapper {
 	        UserSummary userSummary = new UserSummary(user.getId(), user.getUsername());
 	        return ReplyResponse.builder()
 	                .id(reply.getId())
-	                .commentId(reply.getCommentId())
 	                .userSummary(userSummary)
 	                .replyComment(reply.getReplyComment())
 	                .createdAt(reply.getCreatedAt())
@@ -40,9 +40,9 @@ public class ReplyMapper {
 	  * @param commentId
 	  * @return Reply
 	  */
-	 public Reply toEntity(ReplyRequest request,User user,Long commentId) {
+	 public Reply toEntity(ReplyRequest request,User user,DiscussionItem discussionItem) {
 		 return Reply.builder()
-				 .commentId(commentId)
+				 .discussionItem(discussionItem)
 				 .replyComment(request.getReplyComment())
 				 .user(user)
 				 .build();

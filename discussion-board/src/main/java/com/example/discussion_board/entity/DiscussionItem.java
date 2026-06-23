@@ -39,8 +39,7 @@ public class DiscussionItem {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "reply_id")
+	@OneToMany(mappedBy = "discussionItem", fetch = FetchType.LAZY)
 	private List<Reply> replies;
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;

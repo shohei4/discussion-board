@@ -68,6 +68,11 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 						            .stream()
 						            .map(replyMapper::toResponse)
 						            .toList();
+						item.getReplies().forEach(reply -> {
+						    System.out.println("replyId=" + reply.getId());
+						    System.out.println("comment=" + reply.getReplyComment());
+						    System.out.println("user=" + reply.getUser().getUsername());
+						});
 						
 						DiscussionItemWithReplyResponse response =
 						        DiscussionItemWithReplyResponse.builder()

@@ -8,9 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.discussion_board.dto.ReplyRequest;
 import com.example.discussion_board.dto.ReplyResponse;
+import com.example.discussion_board.entity.DiscussionItem;
 import com.example.discussion_board.entity.Reply;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.mapper.ReplyMapper;
+import com.example.discussion_board.repository.DiscussionItemRepository;
 import com.example.discussion_board.repository.ReplyRepository;
 import com.example.discussion_board.service.ReplyService;
 
@@ -21,34 +23,38 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReplyServiceImpl implements ReplyService {
 	
-	private final ReplyRepository repository;
+	private final ReplyRepository replyRepository;
+	private final DiscussionItemRepository discussionItemRepository;
 	private final ReplyMapper mapper;
 	@Override
-	public List<ReplyResponse> findAllReply(Long commentId) {
+	public List<ReplyResponse> findAllReply(Long discussionItemId) {
 		// TODO 自動生成されたメソッド・スタブ
-		List<ReplyResponse> responses = repository.findByCommentIdAndIsDeletedFalse(commentId)
+		List<ReplyResponse> responses = replyRepository.findByDiscussionItem_IdAndIsDeletedFalse(discussionItemId)
 		.stream()
 		.map(mapper::toResponse)
 		.collect(Collectors.toList());
 		return responses;
 	}
 	@Override
-	public ReplyResponse saveReply(ReplyRequest request,User user, Long commentId) {
+	public ReplyResponse saveReply(ReplyRequest request,User user, Long discussionItemId) {
 		// TODO 自動生成されたメソッド・スタブ
-		Reply reply = mapper.toEntity(request, user, commentId);
-		repository.save(reply);
+		DiscussionItem discussionItem = discussionItemRepository.findById(discussionItemId)
+				.orElseThrow(() -> new RuntimeException("議論コメントが見つかりません"));
+				
+		Reply reply = mapper.toEntity(request, user, discussionItem);
+		replyRepository.save(reply);
 		ReplyResponse response = mapper.toResponse(reply);
 		return response;
 	}
 	@Override
 	public ReplyResponse updateReply(Long replyId, ReplyRequest request) {
 		// TODO 自動生成されたメソッド・スタブ
-		Reply reply = repository.findById(replyId)
+		Reply reply = replyRepository.findById(replyId)
 				.orElseThrow(() -> new RuntimeException("返信コメントが見つかりません"));
 		
 		reply.setReplyComment(request.getReplyComment());
 		
-		repository.save(reply);
+		replyRepository.save(reply);
 		return mapper.toResponse(reply);
 	}
 	
