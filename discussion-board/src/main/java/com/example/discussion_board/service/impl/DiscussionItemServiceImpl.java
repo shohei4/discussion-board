@@ -47,7 +47,7 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 		
 		//議論コメントレスポンスのビルド
 		List<DiscussionItemWithReplyResponse> responses = 
-				discussionItemRepository.findAllByGidaiId(gidaiId)
+				discussionItemRepository.findAllWithRepliesByGidaiId(gidaiId)
 					.stream()
 					.map((DiscussionItem item) -> {
 						//編集flag状態を取得
