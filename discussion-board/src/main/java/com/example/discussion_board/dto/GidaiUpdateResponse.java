@@ -1,5 +1,7 @@
 package com.example.discussion_board.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,4 +22,5 @@ public class GidaiUpdateResponse {
 	@Builder.Default
 	private boolean editable = false;
 	private UserSummary userSummary;
+	private LocalDateTime updatedAt;
 }

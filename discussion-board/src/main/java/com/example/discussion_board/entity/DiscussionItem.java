@@ -15,6 +15,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,19 +44,20 @@ public class DiscussionItem {
 	private User user;
 	@OneToMany(mappedBy = "discussionItem", fetch = FetchType.LAZY)
 	private List<Reply> replies;
+	@CreationTimestamp
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
-	@Column
+
+	@Column  // @UpdateTimestamp を削除 フロントでupdateATの有無で表示を切り替えるため
 	private LocalDateTime updatedAt;
-	
+
 	@PrePersist
 	public void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
+	    this.createdAt = LocalDateTime.now(); // @CreationTimestamp があるので省略も可
 	}
-	
+
 	@PreUpdate
 	public void onUpdate() {
-		this.updatedAt = LocalDateTime.now();
+	    this.updatedAt = LocalDateTime.now();
 	}
 }

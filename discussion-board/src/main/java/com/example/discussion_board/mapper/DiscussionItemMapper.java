@@ -9,7 +9,6 @@ import com.example.discussion_board.dto.GidaiSummary;
 import com.example.discussion_board.dto.LikeResultResponse;
 import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.DiscussionItem;
-import com.example.discussion_board.util.DateTimeFormats;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,8 +32,8 @@ public class DiscussionItemMapper {
 									.gidaiSummary(gidaiSummary)
 									.userSummary(userSummary)
 									.likeResult(likeResult)
-									.createdAt(discussionItem.getCreatedAt().format(DateTimeFormats.JAPAN))
-									.updatedAt(discussionItem.getUpdatedAt().format(DateTimeFormats.JAPAN))
+									.createdAt(discussionItem.getCreatedAt())
+									.updatedAt(discussionItem.getUpdatedAt())
 									.build();
 		return response;
 	}

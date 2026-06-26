@@ -27,11 +27,9 @@ function showFieldErrors(errors) {
 	
 	// 日時フォーマット統一関数
 function formatDateTime(dateStr) {
-    const date = new Date(dateStr);
-    const yyyy = date.getFullYear();
-    const MM = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const hh = String(date.getHours()).padStart(2, '0');
-    const mm = String(date.getMinutes()).padStart(2, '0');
-    return `${yyyy}/${MM}/${dd} ${hh}:${mm}`;
+	if (!dateStr) return null;
+	   const [datePart, timePart] = dateStr.split('T');
+	   const [yyyy, MM, dd] = datePart.split('-');
+	   const [hh, mm] = timePart.split(':');
+	   return `${yyyy}/${MM}/${dd} ${hh}:${mm}`;
 }

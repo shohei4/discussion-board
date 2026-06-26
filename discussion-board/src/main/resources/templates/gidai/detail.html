@@ -14,6 +14,11 @@
 
 		<!-- 議題カード -->
 		<div class="card shadow-sm mb-4">
+			<div class="card-header">
+				<h2>
+					議題
+				</h2>
+			</div>
 			<div class="card-body">
 
 				<!-- タイトル -->
@@ -31,7 +36,11 @@
 					作成者：
 					<span id="username" class="fw-semibold"></span>
 				</p>
-
+				
+				<!-- 投稿日時 -->
+				<p class="text-muted mb-4">
+					<span id="date" class="fw-semibold"></span>
+				</p>
 				<!-- 操作ボタン -->
 				<div class="d-flex gap-2">
 					<a id="EditGidaiLink" class="btn btn-outline-warning">
@@ -120,6 +129,10 @@
 			document.getElementById('title').innerText = gidaiResponse.title;
 			document.getElementById('body').innerText = gidaiResponse.body;
 			document.getElementById('username').innerText = gidaiResponse.userSummary.username
+			document.getElementById('date').innerText = 
+			    gidaiResponse.updatedAt 
+			        ? `更新日：${formatDateTime(gidaiResponse.updatedAt)}` 
+			        : `登録日：${formatDateTime(gidaiResponse.createdAt)}`;
 
 			// 2. 編集ボタンの制御
 			const editBtn = document.getElementById('EditGidaiLink');
@@ -165,7 +178,9 @@
 							<div class="ms-4 mt-2 border-start ps-3">
 								<strong>${reply.userSummary.username}</strong>
 								<br>${reply.replyComment}
-								<br><small>${formatDateTime(reply.createdAt)}</small>
+								<br><small>${reply.updatedAt 
+									? formatDateTime(reply.updatedAt) 
+									: formatDateTime(reply.createdAt)}</small>
 							</div>
 							`
 				)

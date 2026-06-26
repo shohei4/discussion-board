@@ -1,6 +1,7 @@
 package com.example.discussion_board.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.discussion_board.dto.GidaiRegistrationRequest;
 import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.dto.GidaiUpdateRequest;
-import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.exception.ResourceNotFoundException;
@@ -34,21 +34,23 @@ public class GidaiServiceImpl implements GidaiService {
 	public List<GidaiResponse> findAllGidai() {
 		// TODO 自動生成されたメソッド・スタブ
 		List<Gidai> gidaiList = repository.findAllByIsDeletedFalse();
-		if (gidaiList.isEmpty()) {
+	    if (gidaiList.isEmpty()) {
 	        throw new ResourceNotFoundException(GlobalErrorCode.GIDAI_EMPTY);
 	    }
-		List<GidaiResponse> responseList = mapper.toResponseList(gidaiList);
-		return responseList;
+	    return gidaiList.stream()
+	    		//一覧表示ではeditableは非表示なのでfalseで固定
+	            .map(gidai -> mapper.toResponse(gidai, false))
+	            .collect(Collectors.toList());
 	}
 
 	@Override
-	public GidaiUpdateResponse findByIdGidai(Long id) {
+	public GidaiResponse findByIdGidai(Long id) {
 		// TODO 自動生成されたメソッド・スタブ
 		Gidai gidai = repository.findByIdAndIsDeletedFalse(id)
 				.orElseThrow(() -> new ResourceNotFoundException(GlobalErrorCode.GIDAI_EMPTY));
 		//編集flagの取得
 		boolean editable = currentUserService.isOwner(gidai.getUser().getId());
-		GidaiUpdateResponse response = mapper.toUpdateResponse(gidai, editable)
+		GidaiResponse response = mapper.toResponse(gidai,editable)
 ;		return response;
 	}
 	
@@ -59,8 +61,9 @@ public class GidaiServiceImpl implements GidaiService {
 		if (gidaiList.isEmpty()) {
 	        throw new ResourceNotFoundException(GlobalErrorCode.GIDAI_EMPTY);
 	    }
-		List<GidaiResponse> responseList = mapper.toResponseList(gidaiList);
-		return responseList;
+		return gidaiList.stream()
+	            .map(gidai -> mapper.toResponse(gidai, false))
+	            .collect(Collectors.toList());
 	}
 
 
@@ -69,11 +72,11 @@ public class GidaiServiceImpl implements GidaiService {
 		// TODO 自動生成されたメソッド・スタブ
 		Gidai gidai = mapper.toEntity(request, user);
 		repository.save(gidai);
-		return mapper.toResponse(gidai);
+		return mapper.toResponse(gidai,true);
 	}
 
 	@Override
-	public GidaiUpdateResponse editGidai(Long id, GidaiUpdateRequest request) {
+	public GidaiResponse editGidai(Long id, GidaiUpdateRequest request) {
 		// TODO 自動生成されたメソッド・スタブ
 		
 		Gidai gidai = repository.findByIdAndIsDeletedFalse(id)
@@ -84,7 +87,7 @@ public class GidaiServiceImpl implements GidaiService {
 		repository.save(gidai);
 		//編集flagの取得
 		boolean editable = currentUserService.isOwner(gidai.getUser().getId());
-		GidaiUpdateResponse response = mapper.toUpdateResponse(gidai, editable);
+		GidaiResponse response = mapper.toResponse(gidai, editable);
 		return response;
 	}
 

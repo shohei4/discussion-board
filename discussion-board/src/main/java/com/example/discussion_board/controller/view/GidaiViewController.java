@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.example.discussion_board.dto.GidaiUpdateResponse;
+import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.model.Genre;
 import com.example.discussion_board.service.GidaiService;
 
@@ -40,7 +40,7 @@ public class GidaiViewController {
 	
 	@GetMapping("/update/{id}")
 	public String viewUpdate(@PathVariable Long id, Model model) {
-		GidaiUpdateResponse response = gidaiService.findByIdGidai(id);
+		GidaiResponse response = gidaiService.findByIdGidai(id);
 		model.addAttribute("gidaiItem", response);
 		//ジャンルのプルダウン用のgenreオブジェクト
 		model.addAttribute("genres", Genre.values());

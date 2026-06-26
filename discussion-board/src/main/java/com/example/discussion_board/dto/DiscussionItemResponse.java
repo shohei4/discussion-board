@@ -1,5 +1,7 @@
 package com.example.discussion_board.dto;
 
+import java.time.LocalDateTime;
+
 import com.example.discussion_board.entity.DiscussionItem;
 
 import lombok.AllArgsConstructor;
@@ -23,8 +25,8 @@ public class DiscussionItemResponse {
 	private LikeResultResponse likeResult;
 	//編集ボタン表示用のflagフィールド
 	private boolean editable;
-	private String createdAt;
-	private String updatedAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 	
 	//議論コメントエンティティの基本フィールドをビルドするformメソッド
 	public static DiscussionItemResponseBuilder from(DiscussionItem item) {
@@ -33,7 +35,7 @@ public class DiscussionItemResponse {
             .comment(item.getComment())
             .userSummary(UserSummary.from(item.getUser()))
             .gidaiSummary(GidaiSummary.from(item.getGidai()))
-            .createdAt(item.getCreatedAt().toString())
-            .updatedAt(item.getUpdatedAt().toString());
+            .createdAt(item.getCreatedAt())
+            .updatedAt(item.getUpdatedAt());
     }
 }

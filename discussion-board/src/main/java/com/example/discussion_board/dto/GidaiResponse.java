@@ -1,5 +1,7 @@
 package com.example.discussion_board.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,5 +19,11 @@ public class GidaiResponse {
     private String title;
     private String body;
     private String genre;
+    //編集ボタン表示用フラグ
+    private boolean editable;
+    //削除フラグ
+    private boolean isDeleted;
     private UserSummary userSummary;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

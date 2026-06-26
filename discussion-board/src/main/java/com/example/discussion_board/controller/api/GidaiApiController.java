@@ -3,6 +3,8 @@ package com.example.discussion_board.controller.api;
 import java.net.URI;
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,14 +19,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.example.discussion_board.dto.GidaiRegistrationRequest;
 import com.example.discussion_board.dto.GidaiResponse;
 import com.example.discussion_board.dto.GidaiUpdateRequest;
-import com.example.discussion_board.dto.GidaiUpdateResponse;
 import com.example.discussion_board.entity.User;
 import com.example.discussion_board.model.Genre;
 import com.example.discussion_board.security.CustomUserDetails;
 import com.example.discussion_board.service.GidaiService;
 import com.example.discussion_board.service.UserService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -43,7 +43,7 @@ public class GidaiApiController {
 	
 	@GetMapping("{id}")
 	public ResponseEntity<?> getById(@PathVariable Long id) {
-		GidaiUpdateResponse response = gidaiService.findByIdGidai(id);
+		GidaiResponse response = gidaiService.findByIdGidai(id);
 		return ResponseEntity.ok(response);
 	}
 	
@@ -63,8 +63,8 @@ public class GidaiApiController {
 	}
 	
 	@PutMapping("{id}")
-	public ResponseEntity<GidaiUpdateResponse> updateGidai(@PathVariable Long id, @Valid @RequestBody GidaiUpdateRequest request){	
-		GidaiUpdateResponse updatedGidai = gidaiService.editGidai(id,request);
+	public ResponseEntity<GidaiResponse> updateGidai(@PathVariable Long id, @Valid @RequestBody GidaiUpdateRequest request){	
+		GidaiResponse updatedGidai = gidaiService.editGidai(id,request);
 		
 		return ResponseEntity.ok(updatedGidai);
 	}
