@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
@@ -50,11 +49,6 @@ public class DiscussionItem {
 
 	@Column  // @UpdateTimestamp を削除 フロントでupdateATの有無で表示を切り替えるため
 	private LocalDateTime updatedAt;
-
-	@PrePersist
-	public void onCreate() {
-	    this.createdAt = LocalDateTime.now(); // @CreationTimestamp があるので省略も可
-	}
 
 	@PreUpdate
 	public void onUpdate() {

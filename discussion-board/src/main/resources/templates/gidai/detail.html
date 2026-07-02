@@ -36,20 +36,19 @@
 					作成者：
 					<span id="username" class="fw-semibold"></span>
 				</p>
-				
+
 				<!-- 投稿日時 -->
 				<p class="text-muted mb-4">
 					<span id="date" class="fw-semibold"></span>
 				</p>
 				<!-- 操作ボタン -->
 				<div class="d-flex gap-2">
-					<a id="EditGidaiLink" class="btn btn-outline-warning">
-						<i class="bi bi-pencil-square"></i> 編集
-					</a>
-
 					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commentModal">
 						<i class="bi bi-chat-dots"></i> コメント投稿
 					</button>
+					<a id="EditGidaiLink" class="btn btn-outline-warning">
+						<i class="bi bi-pencil-square"></i> 編集
+					</a>
 				</div>
 			</div>
 		</div>
@@ -129,10 +128,10 @@
 			document.getElementById('title').innerText = gidaiResponse.title;
 			document.getElementById('body').innerText = gidaiResponse.body;
 			document.getElementById('username').innerText = gidaiResponse.userSummary.username
-			document.getElementById('date').innerText = 
-			    gidaiResponse.updatedAt 
-			        ? `更新日：${formatDateTime(gidaiResponse.updatedAt)}` 
-			        : `登録日：${formatDateTime(gidaiResponse.createdAt)}`;
+			document.getElementById('date').innerText =
+				gidaiResponse.updatedAt
+					? `更新日：${formatDateTime(gidaiResponse.updatedAt)}`
+					: `登録日：${formatDateTime(gidaiResponse.createdAt)}`;
 
 			// 2. 編集ボタンの制御
 			const editBtn = document.getElementById('EditGidaiLink');
@@ -175,12 +174,22 @@
 
 			const repliesHTML = replies
 				.map(reply => `
-							<div class="ms-4 mt-2 border-start ps-3">
+							<div class="ms-4 mt-2 border-start ps-3" data-reply-id="${reply.id}">
 								<strong>${reply.userSummary.username}</strong>
 								<br>${reply.replyComment}
-								<br><small>${reply.updatedAt 
-									? formatDateTime(reply.updatedAt) 
-									: formatDateTime(reply.createdAt)}</small>
+								<br>
+								<small>${reply.updatedAt
+						? formatDateTime(reply.updatedAt) + ' <span class="badge bg-secondary">編集済み</span>'
+						: formatDateTime(reply.createdAt)}
+								</small>
+								${reply.editable ? `
+								<br><button
+									type="button"
+									class="btn btn-online-warning btn-sm edit-raply-btn mt-1"
+									data-reply-id="${rely.id}">
+									<i class="bi bi-pencil-square"></i> 編集
+								
+								</button>` : ''}
 							</div>
 							`
 				)
@@ -210,6 +219,13 @@
 					data-bs-target="#replyModal">
 					<i class="bi bi-chat-dots"></i> 返信
 				</button>
+				${item.editable ? `
+				       <button 
+				           type="button" 
+				           class="btn btn-outline-warning btn-sm edit-comment-btn" 
+				           data-comment-id="${item.id}">
+				           <i class="bi bi-pencil-square"></i> 編集
+				       </button>` : ''}
 			</div>
 			
 			<!-- ★ トグルボタン -->

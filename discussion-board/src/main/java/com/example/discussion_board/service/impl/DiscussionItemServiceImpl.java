@@ -2,6 +2,8 @@ package com.example.discussion_board.service.impl;
 
 import java.util.List;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,12 +23,11 @@ import com.example.discussion_board.mapper.DiscussionItemMapper;
 import com.example.discussion_board.mapper.ReplyMapper;
 import com.example.discussion_board.repository.DiscussionItemRepository;
 import com.example.discussion_board.repository.GidaiRepository;
-import com.example.discussion_board.repository.UserRepository;
 import com.example.discussion_board.security.CustomUserDetails;
 import com.example.discussion_board.service.CommentLikeService;
+import com.example.discussion_board.service.CurrentUserService;
 import com.example.discussion_board.service.DiscussionItemService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -35,11 +36,11 @@ import lombok.RequiredArgsConstructor;
 public class DiscussionItemServiceImpl implements DiscussionItemService {
 	
 	private final DiscussionItemRepository discussionItemRepository;
-	private final UserRepository userRepository;
 	private final GidaiRepository gidaiRepository;
 	private final DiscussionItemMapper discussionItemMapper;
 	private final CommentLikeService commentLikeService;
 	private final ReplyMapper replyMapper;
+	private final CurrentUserService currentUserService;
 	
 	@Override
 	public List<DiscussionItemWithReplyResponse> findAllByGidaiId(Long gidaiId) {
@@ -80,8 +81,8 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 						            .comment(item.getComment())
 						            .userSummary(UserSummary.from(item.getUser()))
 						            .gidaiSummary(GidaiSummary.from(item.getGidai()))
-						            .createdAt(item.getCreatedAt().toString())
-						            .updatedAt(item.getUpdatedAt().toString())
+						            .createdAt(item.getCreatedAt())
+						            .updatedAt(item.getUpdatedAt())
 						            .replies(replies)
 						            .likeResult(likeResult)
 						            .editable(editable)
@@ -91,12 +92,21 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 					.toList();
 		return responses;
 	}
-
+	
 	@Override
-	public DiscussionItemResponse createDiscussionItem(DiscussionItemRequest request, Long gidaiId, Long userId) {
+	public DiscussionItemResponse findById(Long discussionItemId) {
 		// TODO 自動生成されたメソッド・スタブ
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));;
+		DiscussionItem discussionItem = discussionItemRepository.findById(discussionItemId)
+				.orElseThrow(() -> new EntityNotFoundException("議論コメントが見つかりません"));
+		
+		DiscussionItemResponse response = discussionItemMapper.toResponse(discussionItem);
+		return response;
+	}
+
+	
+	@Override
+	public DiscussionItemResponse createDiscussionItem(DiscussionItemRequest request, Long gidaiId, User user) {
+		// TODO 自動生成されたメソッド・スタブ
 		Gidai gidai = gidaiRepository.findById(gidaiId)
 				.orElseThrow(() -> new IllegalArgumentException(
 		                "指定された議題IDが存在しません: " + gidaiId));
@@ -109,9 +119,9 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 		//いいねカウントの取得
 		Long likeCount = commentLikeService.conuntLikes(discussionItem.getId());
 		//いいね状態の取得
-		boolean isLiked = commentLikeService.getIsLiked(discussionItem.getId(), userId);
+		boolean isLiked = commentLikeService.getIsLiked(discussionItem.getId(), user.getId());
 		LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
-		DiscussionItemResponse response = discussionItemMapper.toResponse(discussionItem, likeResult);
+		DiscussionItemResponse response = discussionItemMapper.toResponse(discussionItem, likeResult, true);
 		return response;
 	}
 

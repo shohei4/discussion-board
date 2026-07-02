@@ -18,7 +18,7 @@ public class DiscussionItemMapper {
 
 	private final ModelMapper modelMapper;
 	
-	public DiscussionItemResponse toResponse(DiscussionItem discussionItem, LikeResultResponse likeResult) {
+	public DiscussionItemResponse toResponse(DiscussionItem discussionItem, LikeResultResponse likeResult, Boolean editable) {
 		//簡易ユーザークラス作成
 		UserSummary userSummary = new UserSummary(discussionItem.getUser().getId(), discussionItem.getUser().getUsername());
 		//簡易議題クラス作成
@@ -32,6 +32,19 @@ public class DiscussionItemMapper {
 									.gidaiSummary(gidaiSummary)
 									.userSummary(userSummary)
 									.likeResult(likeResult)
+									.editable(editable)
+									.createdAt(discussionItem.getCreatedAt())
+									.updatedAt(discussionItem.getUpdatedAt())
+									.build();
+		return response;
+	}
+	
+	//更新時のMapperメソッド
+	public DiscussionItemResponse toResponse(DiscussionItem discussionItem) {
+		
+		DiscussionItemResponse response = DiscussionItemResponse.builder()
+									.id(discussionItem.getId())
+									.comment(discussionItem.getComment())
 									.createdAt(discussionItem.getCreatedAt())
 									.updatedAt(discussionItem.getUpdatedAt())
 									.build();

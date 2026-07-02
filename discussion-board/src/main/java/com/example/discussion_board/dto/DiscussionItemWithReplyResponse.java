@@ -1,5 +1,6 @@
 package com.example.discussion_board.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ public class DiscussionItemWithReplyResponse {
 	private LikeResultResponse likeResult;
 	//編集ボタン表示用のflagフィールド
 	private boolean editable;
-	private String createdAt;
-	private String updatedAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 	private List<ReplyResponse> replies;
 }

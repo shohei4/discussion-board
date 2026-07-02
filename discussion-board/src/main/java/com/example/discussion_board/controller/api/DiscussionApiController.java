@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.discussion_board.dto.DiscussionItemRequest;
 import com.example.discussion_board.dto.DiscussionItemResponse;
 import com.example.discussion_board.dto.DiscussionItemWithReplyResponse;
+import com.example.discussion_board.entity.User;
 import com.example.discussion_board.security.CustomUserDetails;
 import com.example.discussion_board.service.DiscussionItemService;
+import com.example.discussion_board.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class DiscussionApiController {
 	
 	private final DiscussionItemService discussionItemService;
+	private final UserService userService;
 	
 	@GetMapping("/list/{gidaiId}")
 	public ResponseEntity<List<DiscussionItemWithReplyResponse>> getAll(@PathVariable Long gidaiId) {
@@ -35,8 +38,10 @@ public class DiscussionApiController {
 	
 	@PostMapping("/save/{gidaiId}")
 	public ResponseEntity<DiscussionItemResponse> save(@PathVariable Long gidaiId, 
-			@RequestBody DiscussionItemRequest request, @AuthenticationPrincipal CustomUserDetails user){
-		DiscussionItemResponse response = discussionItemService.createDiscussionItem(request, gidaiId, user.getId());
+			@RequestBody DiscussionItemRequest request, @AuthenticationPrincipal CustomUserDetails userDetails){
+		
+		User user = userService.getUserEntityById(userDetails.getId());
+		DiscussionItemResponse response = discussionItemService.createDiscussionItem(request, gidaiId, user);
 		
 		URI location = URI.create("/api/discussoin/" + response.getId());
 		return ResponseEntity.created(location).body(response);
