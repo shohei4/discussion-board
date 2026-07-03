@@ -2,6 +2,8 @@ package com.example.discussion_board.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,11 +12,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -50,8 +49,14 @@ public class Reply {
 	private Boolean isDeleted = false;
 	
 	@CreationTimestamp
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
-	
-	@UpdateTimestamp
+
+	@Column  // @UpdateTimestamp を削除 フロントでupdateATの有無で表示を切り替えるため
 	private LocalDateTime updatedAt;
+
+	@PreUpdate
+	public void onUpdate() {
+	    this.updatedAt = LocalDateTime.now();
+	}
 }

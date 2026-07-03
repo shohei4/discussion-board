@@ -148,10 +148,6 @@
 
 		//コメントDOM追加メソッド
 		async function appendComment(item) {
-			//でバック
-			console.log("item =", item);
-			console.log("replies =", item.replies);
-
 			const list = document.getElementById('commentList');
 			const div = document.createElement('div');
 			//返信取得
@@ -185,8 +181,8 @@
 								${reply.editable ? `
 								<br><button
 									type="button"
-									class="btn btn-online-warning btn-sm edit-raply-btn mt-1"
-									data-reply-id="${rely.id}">
+									class="btn btn-outline-warning btn-sm edit-raply-btn mt-1"
+									data-reply-id="${reply.id}">
 									<i class="bi bi-pencil-square"></i> 編集
 								
 								</button>` : ''}
@@ -204,8 +200,8 @@
 
 			div.innerHTML = `
 		    <strong>${item.userSummary.username}</strong>
-		    <br>${item.comment}
-		    <br><small>${formatDateTime(item.createdAt)}</small>
+		    <br><span class="comment-text">${item.comment}</span>
+		    <br><small class="comment-datetime">${formatDateTime(item.createdAt)}</small>
 			
 			<div class="d-flex gap-2 align-items-center">
 				<button class="like-toggle-btn btn btn-sm ${btnClass}">
@@ -257,6 +253,25 @@
 			console.log(typeof formatDateTime)
 			list.prepend(div);
 		}
+		
+		//更新用DOM関数
+		function updateCommentInDOM(commentId, data) {
+			const commentEl = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+			if (!commentEl) {
+				console.warn(`comment-id ${commentId} の要素が見つかりません`);
+				return;
+			}
+			
+			//本文を差し替え
+			const textEl = commentEl.querySelector('.comment-text');
+			textEl.textContent = data.comment;
+			
+			//日時変更を更新
+			const dateEl = commentEl.querySelector('.comment-datetime');
+			textEl.innerHTML = data.updatedAt
+				? `${formatDateTime(data.updatedAt)} <span class="badge bg-secondary">編集済み</span>`
+				: formatDateTime(data.createdAt);
+		}
 
 		//画面表示時の処理
 		document.addEventListener("DOMContentLoaded", async () => {
@@ -283,42 +298,85 @@
 		}
 
 		// モーダルからコメント投稿
-		document.getElementById('submitModalComment').addEventListener("click", async () => {
-			const comment = document.getElementById('modalComment').value;
-			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
-			const token = sessionStorage.getItem('accessToken');
-
-			if (!token) {
-				document.getElementById('modalMessage').innerText = "ログインが必要です";
-				return;
-			}
-			if (!comment) {
-				document.getElementById('modalMessage').innerText = "コメントを入力してください";
-				return;
-			}
-
-			try {
-				//POSTリクエスト
-				const response = await authenticatedFetch(`${API_BASE}/save/${gidaiId}`, {
-					method: "POST",
-					headers: {"Content-Type": "application/json"},
-					body: JSON.stringify({comment})
-				});
-				if (!response.ok) throw new Error("投稿に失敗しました");
-
-				const data = await response.json();
-				appendComment(data);
-
-				document.getElementById('modalComment').value = "";
-				document.getElementById('modalMessage').innerText = "";
-
-				// モーダルを閉じる
-				const modal = bootstrap.Modal.getInstance(document.getElementById('commentModal'));
-				modal.hide();
-
-			} catch (err) {
-				document.getElementById('modalMessage').innerText = err.message;
-			}
+		document.getElementById('submitModalComment').addEventListener("click", async function () {
+		    const comment = document.getElementById('modalComment').value;
+		    const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+		    const token = sessionStorage.getItem('accessToken');
+		
+		    if (!token) {
+		        document.getElementById('modalMessage').innerText = "ログインが必要です";
+		        return;
+		    }
+		    if (!comment) {
+		        document.getElementById('modalMessage').innerText = "コメントを入力してください";
+		        return;
+		    }
+		
+		    // 編集モードかどうかを判定
+		    const mode = this.dataset.mode || 'create';
+		    const commentId = this.dataset.commentId;
+		
+		    const url = mode === 'edit'
+		        ? `${API_BASE}/update/${commentId}`
+		        : `${API_BASE}/save/${gidaiId}`;
+		    const method = mode === 'edit' ? 'PUT' : 'POST';
+		
+		    try {
+		        const response = await authenticatedFetch(url, {
+		            method: method,
+		            headers: {"Content-Type": "application/json"},
+		            body: JSON.stringify({comment})
+		        });
+		        if (!response.ok) throw new Error(mode === 'edit' ? "更新に失敗しました" : "投稿に失敗しました");
+		
+		        const data = await response.json();
+		
+		        if (mode === 'edit') {
+		            updateCommentInDOM(commentId, data);
+		        } else {
+		            appendComment(data);
+		        }
+		
+		        document.getElementById('modalComment').value = "";
+		        document.getElementById('modalMessage').innerText = "";
+		
+		        const modal = bootstrap.Modal.getInstance(document.getElementById('commentModal'));
+		        modal.hide();
+		
+		        // モーダルの状態を新規投稿用にリセット
+		        document.getElementById('commentModalLabel').textContent = "コメント投稿"; // ← タイポ修正
+		        this.textContent = "投稿";
+		        delete this.dataset.mode;
+		        delete this.dataset.commentId;
+		
+		    } catch (err) {
+		        document.getElementById('modalMessage').innerText = err.message;
+		    }
+		});
+		
+		
+		//イベント移譲で編集ボタンのclick処理を定義
+		//非同期でコメントが投稿されるから
+		document.getElementById('commentList').addEventListener('click', (e) => {
+		    const btn = e.target.closest('.edit-comment-btn');
+		    if (!btn) return;
+		
+		    const commentId = btn.dataset.commentId;
+		
+		    const commentEl = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+		    const currentText = commentEl.querySelector('.comment-text').textContent;
+		
+		    document.getElementById('modalComment').value = currentText;
+		    document.getElementById('modalMessage').innerText = "";
+		
+		    document.getElementById('commentModalLabel').textContent = "コメント編集";
+		    document.getElementById('submitModalComment').textContent = "更新";
+		
+		    document.getElementById('submitModalComment').dataset.mode = 'edit';
+		    document.getElementById('submitModalComment').dataset.commentId = commentId;
+		
+		    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('commentModal'));
+		    modal.show();
 		});
 
 

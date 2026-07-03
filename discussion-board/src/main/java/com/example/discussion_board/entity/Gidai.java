@@ -2,6 +2,10 @@ package com.example.discussion_board.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import com.example.discussion_board.model.Genre;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,14 +16,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-
-import org.hibernate.annotations.CreationTimestamp;
-
-import com.example.discussion_board.model.Genre;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -63,11 +61,6 @@ public class Gidai {
 
 	@Column  // @UpdateTimestamp を削除 フロントでupdateATの有無で表示を切り替えるため
 	private LocalDateTime updatedAt;
-
-	@PrePersist
-	public void onCreate() {
-	    this.createdAt = LocalDateTime.now(); // @CreationTimestamp があるので省略も可
-	}
 
 	@PreUpdate
 	public void onUpdate() {
