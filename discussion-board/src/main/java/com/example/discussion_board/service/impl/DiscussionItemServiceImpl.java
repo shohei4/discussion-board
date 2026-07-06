@@ -2,8 +2,6 @@ package com.example.discussion_board.service.impl;
 
 import java.util.List;
 
-import jakarta.persistence.EntityNotFoundException;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,6 +26,7 @@ import com.example.discussion_board.service.CommentLikeService;
 import com.example.discussion_board.service.CurrentUserService;
 import com.example.discussion_board.service.DiscussionItemService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -126,9 +125,20 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 	}
 
 	@Override
-	public DiscussionItemResponse editDiscussionItem(DiscussionItemRequest request) {
+	public DiscussionItemResponse editDiscussionItem(DiscussionItemRequest request, Long discussionItemId) {
 		// TODO 自動生成されたメソッド・スタブ
-		return null;
+		DiscussionItem item = discussionItemRepository.findById(discussionItemId)
+	            .orElseThrow(() -> new EntityNotFoundException("議事項目が見つかりません: " + discussionItemId));
+		//フィールド更新
+		item.setComment(request.getComment());
+		
+		//更新method
+		//saveAndFlushを使う理由は@PreUpdateをこの時点で効かせるため
+		DiscussionItem saved = discussionItemRepository.saveAndFlush(item);
+		
+		//DTOに変換
+		DiscussionItemResponse response = discussionItemMapper.toResponse(saved);
+		return response;
 	}
 
 	@Override

@@ -115,6 +115,7 @@
 	<script>
 		const API_BASE = "http://localhost:8080/api/discussion"
 		const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+		let currentCommentId = null;
 
 		//議題取得メソッド
 		async function loadGidaiResponse(gidaiId) {
@@ -170,24 +171,23 @@
 
 			const repliesHTML = replies
 				.map(reply => `
-							<div class="ms-4 mt-2 border-start ps-3" data-reply-id="${reply.id}">
-								<strong>${reply.userSummary.username}</strong>
-								<br>${reply.replyComment}
-								<br>
-								<small>${reply.updatedAt
+				<div class="ms-4 mt-2 border-start ps-3" data-reply-id="${reply.id}">
+				            <strong>${reply.userSummary.username}</strong>
+				            <br><span class="reply-text">${reply.replyComment}</span>
+				            <br>
+				            <small class="reply-datetime">${reply.updatedAt
 						? formatDateTime(reply.updatedAt) + ' <span class="badge bg-secondary">編集済み</span>'
 						: formatDateTime(reply.createdAt)}
-								</small>
-								${reply.editable ? `
-								<br><button
-									type="button"
-									class="btn btn-outline-warning btn-sm edit-raply-btn mt-1"
-									data-reply-id="${reply.id}">
-									<i class="bi bi-pencil-square"></i> 編集
-								
-								</button>` : ''}
-							</div>
-							`
+				            </small>
+				            ${reply.editable ? `
+				            <br><button
+				                type="button"
+				                class="btn btn-outline-warning btn-sm edit-raply-btn mt-1"
+				                data-reply-id="${reply.id}">
+				                <i class="bi bi-pencil-square"></i> 編集
+				            </button>` : ''}
+				        </div>
+				        `
 				)
 				.join('');
 
@@ -201,7 +201,9 @@
 			div.innerHTML = `
 		    <strong>${item.userSummary.username}</strong>
 		    <br><span class="comment-text">${item.comment}</span>
-		    <br><small class="comment-datetime">${formatDateTime(item.createdAt)}</small>
+			<br><small class="comment-datetime">${item.updatedAt
+					? formatDateTime(item.updatedAt) + ' <span class="badge bg-secondary">編集済み</span>'
+					: formatDateTime(item.createdAt)}</small>
 			
 			<div class="d-flex gap-2 align-items-center">
 				<button class="like-toggle-btn btn btn-sm ${btnClass}">
@@ -253,7 +255,7 @@
 			console.log(typeof formatDateTime)
 			list.prepend(div);
 		}
-		
+
 		//更新用DOM関数
 		function updateCommentInDOM(commentId, data) {
 			const commentEl = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
@@ -261,14 +263,14 @@
 				console.warn(`comment-id ${commentId} の要素が見つかりません`);
 				return;
 			}
-			
+
 			//本文を差し替え
 			const textEl = commentEl.querySelector('.comment-text');
 			textEl.textContent = data.comment;
-			
+
 			//日時変更を更新
 			const dateEl = commentEl.querySelector('.comment-datetime');
-			textEl.innerHTML = data.updatedAt
+			dateEl.innerHTML = data.updatedAt
 				? `${formatDateTime(data.updatedAt)} <span class="badge bg-secondary">編集済み</span>`
 				: formatDateTime(data.createdAt);
 		}
@@ -299,84 +301,84 @@
 
 		// モーダルからコメント投稿
 		document.getElementById('submitModalComment').addEventListener("click", async function () {
-		    const comment = document.getElementById('modalComment').value;
-		    const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
-		    const token = sessionStorage.getItem('accessToken');
-		
-		    if (!token) {
-		        document.getElementById('modalMessage').innerText = "ログインが必要です";
-		        return;
-		    }
-		    if (!comment) {
-		        document.getElementById('modalMessage').innerText = "コメントを入力してください";
-		        return;
-		    }
-		
-		    // 編集モードかどうかを判定
-		    const mode = this.dataset.mode || 'create';
-		    const commentId = this.dataset.commentId;
-		
-		    const url = mode === 'edit'
-		        ? `${API_BASE}/update/${commentId}`
-		        : `${API_BASE}/save/${gidaiId}`;
-		    const method = mode === 'edit' ? 'PUT' : 'POST';
-		
-		    try {
-		        const response = await authenticatedFetch(url, {
-		            method: method,
-		            headers: {"Content-Type": "application/json"},
-		            body: JSON.stringify({comment})
-		        });
-		        if (!response.ok) throw new Error(mode === 'edit' ? "更新に失敗しました" : "投稿に失敗しました");
-		
-		        const data = await response.json();
-		
-		        if (mode === 'edit') {
-		            updateCommentInDOM(commentId, data);
-		        } else {
-		            appendComment(data);
-		        }
-		
-		        document.getElementById('modalComment').value = "";
-		        document.getElementById('modalMessage').innerText = "";
-		
-		        const modal = bootstrap.Modal.getInstance(document.getElementById('commentModal'));
-		        modal.hide();
-		
-		        // モーダルの状態を新規投稿用にリセット
-		        document.getElementById('commentModalLabel').textContent = "コメント投稿"; // ← タイポ修正
-		        this.textContent = "投稿";
-		        delete this.dataset.mode;
-		        delete this.dataset.commentId;
-		
-		    } catch (err) {
-		        document.getElementById('modalMessage').innerText = err.message;
-		    }
+			const comment = document.getElementById('modalComment').value;
+			const gidaiId = document.getElementById("gidai-data").dataset.gidaiId;
+			const token = sessionStorage.getItem('accessToken');
+
+			if (!token) {
+				document.getElementById('modalMessage').innerText = "ログインが必要です";
+				return;
+			}
+			if (!comment) {
+				document.getElementById('modalMessage').innerText = "コメントを入力してください";
+				return;
+			}
+
+			// 編集モードかどうかを判定
+			const mode = this.dataset.mode || 'create';
+			const commentId = this.dataset.commentId;
+
+			const url = mode === 'edit'
+				? `${API_BASE}/edit/${commentId}`
+				: `${API_BASE}/save/${gidaiId}`;
+			const method = mode === 'edit' ? 'PUT' : 'POST';
+
+			try {
+				const response = await authenticatedFetch(url, {
+					method: method,
+					headers: {"Content-Type": "application/json"},
+					body: JSON.stringify({comment})
+				});
+				if (!response.ok) throw new Error(mode === 'edit' ? "更新に失敗しました" : "投稿に失敗しました");
+
+				const data = await response.json();
+
+				if (mode === 'edit') {
+					updateCommentInDOM(commentId, data);
+				} else {
+					appendComment(data);
+				}
+
+				document.getElementById('modalComment').value = "";
+				document.getElementById('modalMessage').innerText = "";
+
+				const modal = bootstrap.Modal.getInstance(document.getElementById('commentModal'));
+				modal.hide();
+
+				// モーダルの状態を新規投稿用にリセット
+				document.getElementById('commentModalLabel').textContent = "コメント投稿";
+				this.textContent = "投稿";
+				delete this.dataset.mode;
+				delete this.dataset.commentId;
+
+			} catch (err) {
+				document.getElementById('modalMessage').innerText = err.message;
+			}
 		});
-		
-		
+
+
 		//イベント移譲で編集ボタンのclick処理を定義
 		//非同期でコメントが投稿されるから
 		document.getElementById('commentList').addEventListener('click', (e) => {
-		    const btn = e.target.closest('.edit-comment-btn');
-		    if (!btn) return;
-		
-		    const commentId = btn.dataset.commentId;
-		
-		    const commentEl = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
-		    const currentText = commentEl.querySelector('.comment-text').textContent;
-		
-		    document.getElementById('modalComment').value = currentText;
-		    document.getElementById('modalMessage').innerText = "";
-		
-		    document.getElementById('commentModalLabel').textContent = "コメント編集";
-		    document.getElementById('submitModalComment').textContent = "更新";
-		
-		    document.getElementById('submitModalComment').dataset.mode = 'edit';
-		    document.getElementById('submitModalComment').dataset.commentId = commentId;
-		
-		    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('commentModal'));
-		    modal.show();
+			const btn = e.target.closest('.edit-comment-btn');
+			if (!btn) return;
+
+			const commentId = btn.dataset.commentId;
+
+			const commentEl = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+			const currentText = commentEl.querySelector('.comment-text').textContent;
+
+			document.getElementById('modalComment').value = currentText;
+			document.getElementById('modalMessage').innerText = "";
+
+			document.getElementById('commentModalLabel').textContent = "コメント編集";
+			document.getElementById('submitModalComment').textContent = "更新";
+
+			document.getElementById('submitModalComment').dataset.mode = 'edit';
+			document.getElementById('submitModalComment').dataset.commentId = commentId;
+
+			const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('commentModal'));
+			modal.show();
 		});
 
 
@@ -388,48 +390,104 @@
 			}
 		});
 
-		//返信投稿処理
-		document.getElementById('submitModalReply').addEventListener('click', async () => {
-			const replyComment = document.getElementById('modalReply').value.trim();
+		//返信投稿・編集処理
+		document.getElementById('submitModalReply').addEventListener('click', async function () {
+		    const replyComment = document.getElementById('modalReply').value.trim();
+		
+		    if (!replyComment) {
+		        document.getElementById('replyModalMessage').textContent = '返信を入力してください';
+		        return;
+		    }
+		
+		    // 編集モードかどうかを判定
+		    const mode = this.dataset.mode || 'create';
+		    const replyId = this.dataset.replyId;
+		
+		    const url = mode === 'edit'
+		        ? `/api/reply/edit/${replyId}`
+		        : `/api/reply/comment/${currentCommentId}`;
+		    const method = mode === 'edit' ? 'PUT' : 'POST';
+		
+		    try {
+		        const response = await authenticatedFetch(url, {
+		            method: method,
+		            headers: {'Content-Type': 'application/json'},
+		            body: JSON.stringify({replyComment})
+		        });
+		
+		        if (!response.ok) throw new Error(mode === 'edit' ? '更新に失敗しました' : '投稿に失敗しました');
+		
+		        const data = await response.json();
+		
+		        if (mode === 'edit') {
+		            updateReplyInDOM(replyId, data);
+		        } else {
+		            appendReply(currentCommentId, data);
+		        }
+		
+		        // モーダルを閉じる
+		        bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
+		
+		        // テキストエリアをリセット
+		        document.getElementById('modalReply').value = '';
+		        document.getElementById('replyModalMessage').textContent = '';
+		
+		        // モーダルの状態を新規投稿用にリセット
+		        document.getElementById('replyModalLabel').textContent = "返信投稿";
+		        this.textContent = "返信";
+		        delete this.dataset.mode;
+		        delete this.dataset.replyId;
+		
+		    } catch (e) {
+		        document.getElementById('replyModalMessage').textContent = e.message || '処理に失敗しました';
+		    }
+		});
+		
+		//返信更新用DOM関数
+		function updateReplyInDOM(replyId, data) {
+		    const replyEl = document.querySelector(`[data-reply-id="${replyId}"]`);
+		    if (!replyEl) {
+		        console.warn(`reply-id ${replyId} の要素が見つかりません`);
+		        return;
+		    }
+		
+		    // 本文を差し替え
+		    const textEl = replyEl.querySelector('.reply-text');
+		    textEl.textContent = data.replyComment;
+		
+		    // 日時を更新
+		    const dateEl = replyEl.querySelector('.reply-datetime');
+		    dateEl.innerHTML = data.updatedAt
+		        ? `${formatDateTime(data.updatedAt)} <span class="badge bg-secondary">編集済み</span>`
+		        : formatDateTime(data.createdAt);
+		}
 
-			if (!replyComment) {
-				document.getElementById('replyModalMessage').textContent = '返信を入力してください';
-				return;
-			}
+		// 返信編集ボタンのクリック処理
+		document.getElementById('commentList').addEventListener('click', (e) => {
+			const btn = e.target.closest('.edit-raply-btn');
+			if (!btn) return;
 
-			try {
-				const response = await authenticatedFetch(`/api/reply/comment/${currentCommentId}`, {
-					method: 'POST',
-					headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify({replyComment})
-				});
+			const replyId = btn.dataset.replyId;
+			const replyEl = document.querySelector(`[data-reply-id="${replyId}"]`);
+			// 返信本文のテキストを取得（コメントと違い専用のspanクラスがないので追加推奨）
+			const currentText = replyEl.querySelector('.reply-text').textContent;
 
-				if (!response.ok) throw new Error('投稿失敗');
+			document.getElementById('modalReply').value = currentText;
+			document.getElementById('replyModalMessage').textContent = "";
 
-				const newReply = await response.json();
+			// モーダルのタイトル・ボタン文言を編集用に変更
+			document.getElementById('replyModalLabel').textContent = "返信編集"; // ※replyModalにIDがあれば
+			document.getElementById('submitModalReply').textContent = "更新";
 
-				// ★ ここで確認
-				console.log('newReply =', newReply);
-				console.log('currentCommentId =', currentCommentId);
+			// modeとIDをdatasetに保存
+			document.getElementById('submitModalReply').dataset.mode = 'edit';
+			document.getElementById('submitModalReply').dataset.replyId = replyId;
 
-				// ① モーダルを閉じる
-				bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
-
-				// ② テキストエリアをリセット
-				document.getElementById('modalReply').value = '';
-				document.getElementById('replyModalMessage').textContent = '';
-
-				// ③ DOMに返信を追加
-				appendReply(currentCommentId, newReply);
-
-			} catch (e) {
-				document.getElementById('replyModalMessage').textContent = '投稿に失敗しました';
-			}
+			const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('replyModal'));
+			modal.show();
 		});
 
-		// ----------------------------------------
 		// 返信をDOMに追加
-		// ----------------------------------------
 		function appendReply(commentId, reply) {
 			const commentDiv = document.querySelector(`[data-comment-id="${commentId}"]`);
 			if (!commentDiv) return;
@@ -437,13 +495,21 @@
 			const replyContainer = commentDiv.querySelector('.reply-container');
 			const toggleBtn = commentDiv.querySelector('.toggle-replies-btn');
 
-			// 返信HTMLを追加
+			// 返信HTMLを生成して追加
 			const replyDiv = document.createElement('div');
 			replyDiv.className = 'ms-4 mt-2 border-start ps-3';
+			replyDiv.dataset.replyId = reply.id;
 			replyDiv.innerHTML = `
 		        <strong>${reply.userSummary.username}</strong>
-		        <br>${reply.replyComment}
-		        <br><small>${formatDateTime(reply.createdAt)}</small>
+		        <br><span class="reply-text">${reply.replyComment}</span>
+		        <br><small class="reply-datetime">${formatDateTime(reply.createdAt)}</small>
+		        ${reply.editable ? `
+		        <br><button
+		            type="button"
+		            class="btn btn-outline-warning btn-sm edit-raply-btn mt-1"
+		            data-reply-id="${reply.id}">
+		            <i class="bi bi-pencil-square"></i> 編集
+		        </button>` : ''}
 		    `;
 			replyContainer.appendChild(replyDiv);
 
@@ -464,53 +530,10 @@
 				newToggleBtn.addEventListener('click', () => {
 					const isHidden = replyContainer.style.display === 'none';
 					replyContainer.style.display = isHidden ? 'block' : 'none';
+					const count = replyContainer.querySelectorAll('.ms-4').length;
 					newToggleBtn.innerHTML = isHidden
-						? `返信を閉じる <span class="badge bg-secondary">${replyContainer.querySelectorAll('.ms-4').length}</span>`
-						: `返信を見る <span class="badge bg-secondary">${replyContainer.querySelectorAll('.ms-4').length}</span>`;
-				});
-			}
-		}
-
-
-		// 返信をDOMに追加
-		function appendReply(commentId, reply) {
-			// 対象コメントのdivを取得
-			const commentDiv = document.querySelector(`[data-comment-id="${commentId}"]`);
-			if (!commentDiv) return;
-
-			const replyContainer = commentDiv.querySelector('.reply-container');
-			const toggleBtn = commentDiv.querySelector('.toggle-replies-btn');
-
-			// 返信HTMLを生成して追加
-			const replyDiv = document.createElement('div');
-			replyDiv.className = 'ms-4 mt-2 border-start ps-3';
-			replyDiv.innerHTML = `
-		        <strong>${reply.userSummary.username}</strong>
-		        <br>${reply.replyComment}
-		        <br><small>${formatDateTime(reply.createdAt)}</small>
-		    `;
-			replyContainer.appendChild(replyDiv);
-
-			// ④ 返信一覧を開く
-			replyContainer.style.display = 'block';
-
-			// ⑤ トグルボタンのバッジを更新
-			if (toggleBtn) {
-				const currentCount = replyContainer.querySelectorAll('.ms-4').length;
-				toggleBtn.innerHTML = `返信を閉じる <span class="badge bg-secondary">${currentCount}</span>`;
-			} else {
-				// 返信が0件でトグルボタンがなかった場合は新規作成
-				const newToggleBtn = document.createElement('button');
-				newToggleBtn.className = 'btn btn-sm btn-outline-secondary toggle-replies-btn mt-2';
-				newToggleBtn.innerHTML = `返信を閉じる <span class="badge bg-secondary">1</span>`;
-				replyContainer.before(newToggleBtn);
-
-				newToggleBtn.addEventListener('click', () => {
-					const isHidden = replyContainer.style.display === 'none';
-					replyContainer.style.display = isHidden ? 'block' : 'none';
-					newToggleBtn.innerHTML = isHidden
-						? `返信を閉じる <span class="badge bg-secondary">${replyContainer.querySelectorAll('.ms-4').length}</span>`
-						: `返信を見る <span class="badge bg-secondary">${replyContainer.querySelectorAll('.ms-4').length}</span>`;
+						? `返信を閉じる <span class="badge bg-secondary">${count}</span>`
+						: `返信を見る <span class="badge bg-secondary">${count}</span>`;
 				});
 			}
 		}
@@ -586,17 +609,6 @@
 			}
 		});
 
-		//返信投稿処理のためのコメントid取得
-		let currentCommentId = null;
-		document.getElementById('commentList')
-			.addEventListener('click', (e) => {
-
-				const btn = e.target.closest('.reply-btn');
-
-				if (btn) {
-					currentCommentId = btn.dataset.commentId;
-				}
-			});
 	</script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

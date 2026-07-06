@@ -28,7 +28,7 @@ public interface DiscussionItemService {
 	 * @param request
 	 * @return レスポンスDTO
 	 */
-	DiscussionItemResponse editDiscussionItem(DiscussionItemRequest request);
+	DiscussionItemResponse editDiscussionItem(DiscussionItemRequest request,Long discussionItemId);
 	
 	/**
 	 * 議論コメントの削除
