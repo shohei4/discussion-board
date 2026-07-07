@@ -52,8 +52,7 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 					.map((DiscussionItem item) -> {
 						//編集flag状態を取得
 						Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-						String  loginUsername = auth.getName();
-						boolean editable = item.getUser().getUsername().equals(loginUsername);
+						boolean editable = currentUserService.isOwner(item.getUser().getId());
 						
 						//いいねカウントの取得
 						Long likeCount = commentLikeService.conuntLikes(item.getId());
@@ -63,16 +62,15 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 						Boolean isLiked = commentLikeService.getIsLiked(item.getId(), userDetails.getId());
 						LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
 						
-						List<ReplyResponse> replies =
-						        item.getReplies()
-						            .stream()
-						            .map(replyMapper::toResponse)
-						            .toList();
-						item.getReplies().forEach(reply -> {
-						    System.out.println("replyId=" + reply.getId());
-						    System.out.println("comment=" + reply.getReplyComment());
-						    System.out.println("user=" + reply.getUser().getUsername());
-						});
+						List<ReplyResponse> replies = item.getReplies()
+						        .stream()
+						        .map(reply -> {
+						            ReplyResponse response = replyMapper.toResponse(reply); // ①の変換
+						            response.setEditable(currentUserService.isOwner(reply.getUser().getId())); // ②のeditable設定
+						            return response;
+						        })
+						        .toList();
+						
 						
 						DiscussionItemWithReplyResponse response =
 						        DiscussionItemWithReplyResponse.builder()

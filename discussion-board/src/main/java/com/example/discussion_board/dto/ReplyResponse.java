@@ -23,6 +23,9 @@ public class ReplyResponse {
 	
 	private String replyComment;
 	
+	@Builder.Default
+	private boolean editable = false;
+	
 	private LocalDateTime createdAt;
 	
 	private LocalDateTime updatedAt;

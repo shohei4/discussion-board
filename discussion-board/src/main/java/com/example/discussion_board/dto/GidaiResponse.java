@@ -22,7 +22,8 @@ public class GidaiResponse {
     //編集ボタン表示用フラグ
     private boolean editable;
     //削除フラグ
-    private boolean isDeleted;
+    @Builder.Default
+    private boolean isDeleted = false;
     private UserSummary userSummary;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

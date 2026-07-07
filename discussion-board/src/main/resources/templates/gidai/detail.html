@@ -171,7 +171,7 @@
 
 			const repliesHTML = replies
 				.map(reply => `
-				<div class="ms-4 mt-2 border-start ps-3" data-reply-id="${reply.id}">
+				<div class="ms-4 mt-2 border-start ps-3 reply-item" data-reply-id="${reply.id}">
 				            <strong>${reply.userSummary.username}</strong>
 				            <br><span class="reply-text">${reply.replyComment}</span>
 				            <br>
@@ -182,8 +182,11 @@
 				            ${reply.editable ? `
 				            <br><button
 				                type="button"
-				                class="btn btn-outline-warning btn-sm edit-raply-btn mt-1"
-				                data-reply-id="${reply.id}">
+				                class="btn btn-outline-warning btn-sm edit-reply-btn mt-1"
+				                data-reply-id="${reply.id}"
+								data-bs-toggle="modal"
+								data-bs-target="#replyModal"
+								>
 				                <i class="bi bi-pencil-square"></i> 編集
 				            </button>` : ''}
 				        </div>
@@ -218,12 +221,14 @@
 					<i class="bi bi-chat-dots"></i> 返信
 				</button>
 				${item.editable ? `
-				       <button 
-				           type="button" 
-				           class="btn btn-outline-warning btn-sm edit-comment-btn" 
-				           data-comment-id="${item.id}">
-				           <i class="bi bi-pencil-square"></i> 編集
-				       </button>` : ''}
+					<button 
+					           type="button" 
+					           class="btn btn-outline-warning btn-sm edit-comment-btn" 
+					           data-comment-id="${item.id}"
+					           data-bs-toggle="modal"
+					           data-bs-target="#commentModal">
+					           <i class="bi bi-pencil-square"></i> 編集
+					       </button>` : ''}
 			</div>
 			
 			<!-- ★ トグルボタン -->
@@ -356,136 +361,149 @@
 			}
 		});
 
-
-		//イベント移譲で編集ボタンのclick処理を定義
-		//非同期でコメントが投稿されるから
+		//commentList配下に登録されているclick関連の処理
 		document.getElementById('commentList').addEventListener('click', (e) => {
-			const btn = e.target.closest('.edit-comment-btn');
-			if (!btn) return;
+			const editCommentBtn = e.target.closest('.edit-comment-btn');
+			if (editCommentBtn) return handleEditCommentButtonClick(editCommentBtn);
 
+			const likeBtn = e.target.closest('.like-toggle-btn');
+			if (likeBtn) return handleLikeButtonClick(likeBtn);
+
+			const replyBtn = e.target.closest('.reply-btn');
+			if (replyBtn) return handleReplyButtonClick(replyBtn);
+
+			const editReplyBtn = e.target.closest('.edit-reply-btn');
+			if (editReplyBtn) return handleEditReplyButtonClick(editReplyBtn);
+		});
+
+		//コメント編集ボタン押下時の関数
+		function handleEditCommentButtonClick(btn) {
 			const commentId = btn.dataset.commentId;
 
-			const commentEl = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
-			const currentText = commentEl.querySelector('.comment-text').textContent;
+			const commentElement = btn.closest('.comment-item');
+			const currentComment = commentElement.querySelector('.comment-text').textContent.trim();
 
-			document.getElementById('modalComment').value = currentText;
-			document.getElementById('modalMessage').innerText = "";
+			const submitBtn = document.getElementById('submitModalComment');
+			submitBtn.dataset.mode = 'edit';
+			submitBtn.dataset.commentId = commentId;
+			submitBtn.textContent = '更新';
 
-			document.getElementById('commentModalLabel').textContent = "コメント編集";
-			document.getElementById('submitModalComment').textContent = "更新";
+			document.getElementById('commentModalLabel').textContent = 'コメント編集';
+			document.getElementById('modalComment').value = currentComment;
+			document.getElementById('modalMessage').textContent = '';
+		}
+		//コメントいいねボタン押下時の関数
+		// いいねボタン押下時の処理
+		function handleLikeButtonClick(btn) {
+		    const commentItem = btn.closest('.comment-item');
+		    const commentId = commentItem.dataset.commentId;
+		
+		    toggleStatus(commentId, btn);
+		}
+		//返信ボタン押下時の関数
+		function handleReplyButtonClick(btn) {
+			currentCommentId = btn.dataset.commentId;
 
-			document.getElementById('submitModalComment').dataset.mode = 'edit';
-			document.getElementById('submitModalComment').dataset.commentId = commentId;
+			const submitBtn = document.getElementById('submitModalReply');
+			submitBtn.dataset.mode = 'create';
 
-			const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('commentModal'));
-			modal.show();
-		});
+			delete submitBtn.dataset.replyId;
+			submitBtn.textContent = '返信';
 
+			document.getElementById('replyModalLabel').textContent = '返信投稿';
+			document.getElementById('modalReply').value = '';
+			document.getElementById('replyModalMessage').textContent = '';
+		}
+		//返信編集ボタン押下時の関数
+		// 編集ボタン押下時:編集モーダルを既存本文入りの状態にセットして開く
+		function handleEditReplyButtonClick(btn) {
+			const replyId = btn.dataset.replyId;
 
-		// 返信ボタンクリック時にcommentIdをセット
-		document.getElementById('commentList').addEventListener('click', (e) => {
-			const btn = e.target.closest('.reply-btn');
-			if (btn) {
-				currentCommentId = btn.dataset.commentId;
-			}
-		});
+			// ボタンの親要素(reply-itemを持つdiv)から現在の本文を取得
+			const replyElement = btn.closest('.reply-item');
+			const currentComment = replyElement.querySelector('.reply-text').textContent.trim();
+
+			const submitBtn = document.getElementById('submitModalReply');
+			submitBtn.dataset.mode = 'edit';
+			submitBtn.dataset.replyId = replyId;
+			submitBtn.textContent = '更新';
+
+			document.getElementById('replyModalLabel').textContent = '返信編集';
+			document.getElementById('modalReply').value = currentComment;
+			document.getElementById('replyModalMessage').textContent = '';
+		}
 
 		//返信投稿・編集処理
 		document.getElementById('submitModalReply').addEventListener('click', async function () {
-		    const replyComment = document.getElementById('modalReply').value.trim();
-		
-		    if (!replyComment) {
-		        document.getElementById('replyModalMessage').textContent = '返信を入力してください';
-		        return;
-		    }
-		
-		    // 編集モードかどうかを判定
-		    const mode = this.dataset.mode || 'create';
-		    const replyId = this.dataset.replyId;
-		
-		    const url = mode === 'edit'
-		        ? `/api/reply/edit/${replyId}`
-		        : `/api/reply/comment/${currentCommentId}`;
-		    const method = mode === 'edit' ? 'PUT' : 'POST';
-		
-		    try {
-		        const response = await authenticatedFetch(url, {
-		            method: method,
-		            headers: {'Content-Type': 'application/json'},
-		            body: JSON.stringify({replyComment})
-		        });
-		
-		        if (!response.ok) throw new Error(mode === 'edit' ? '更新に失敗しました' : '投稿に失敗しました');
-		
-		        const data = await response.json();
-		
-		        if (mode === 'edit') {
-		            updateReplyInDOM(replyId, data);
-		        } else {
-		            appendReply(currentCommentId, data);
-		        }
-		
-		        // モーダルを閉じる
-		        bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
-		
-		        // テキストエリアをリセット
-		        document.getElementById('modalReply').value = '';
-		        document.getElementById('replyModalMessage').textContent = '';
-		
-		        // モーダルの状態を新規投稿用にリセット
-		        document.getElementById('replyModalLabel').textContent = "返信投稿";
-		        this.textContent = "返信";
-		        delete this.dataset.mode;
-		        delete this.dataset.replyId;
-		
-		    } catch (e) {
-		        document.getElementById('replyModalMessage').textContent = e.message || '処理に失敗しました';
-		    }
+			const replyComment = document.getElementById('modalReply').value.trim();
+
+			if (!replyComment) {
+				document.getElementById('replyModalMessage').textContent = '返信を入力してください';
+				return;
+			}
+
+			// 編集モードかどうかを判定
+			const mode = this.dataset.mode || 'create';
+			const replyId = this.dataset.replyId;
+
+			const url = mode === 'edit'
+				? `/api/reply/${replyId}`
+				: `/api/reply/comment/${currentCommentId}`;
+			const method = mode === 'edit' ? 'PUT' : 'POST';
+
+			try {
+				const response = await authenticatedFetch(url, {
+					method: method,
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({replyComment})
+				});
+
+				if (!response.ok) throw new Error(mode === 'edit' ? '更新に失敗しました' : '投稿に失敗しました');
+
+				const data = await response.json();
+
+				if (mode === 'edit') {
+					updateReplyInDOM(replyId, data);
+				} else {
+					appendReply(currentCommentId, data);
+				}
+
+				// モーダルを閉じる
+				bootstrap.Modal.getInstance(document.getElementById('replyModal')).hide();
+
+				// テキストエリアをリセット
+				document.getElementById('modalReply').value = '';
+				document.getElementById('replyModalMessage').textContent = '';
+
+				// モーダルの状態を新規投稿用にリセット
+				document.getElementById('replyModalLabel').textContent = "返信投稿";
+				this.textContent = "返信";
+				delete this.dataset.mode;
+				delete this.dataset.replyId;
+
+			} catch (e) {
+				document.getElementById('replyModalMessage').textContent = e.message || '処理に失敗しました';
+			}
 		});
-		
+
 		//返信更新用DOM関数
 		function updateReplyInDOM(replyId, data) {
-		    const replyEl = document.querySelector(`[data-reply-id="${replyId}"]`);
-		    if (!replyEl) {
-		        console.warn(`reply-id ${replyId} の要素が見つかりません`);
-		        return;
-		    }
-		
-		    // 本文を差し替え
-		    const textEl = replyEl.querySelector('.reply-text');
-		    textEl.textContent = data.replyComment;
-		
-		    // 日時を更新
-		    const dateEl = replyEl.querySelector('.reply-datetime');
-		    dateEl.innerHTML = data.updatedAt
-		        ? `${formatDateTime(data.updatedAt)} <span class="badge bg-secondary">編集済み</span>`
-		        : formatDateTime(data.createdAt);
-		}
-
-		// 返信編集ボタンのクリック処理
-		document.getElementById('commentList').addEventListener('click', (e) => {
-			const btn = e.target.closest('.edit-raply-btn');
-			if (!btn) return;
-
-			const replyId = btn.dataset.replyId;
 			const replyEl = document.querySelector(`[data-reply-id="${replyId}"]`);
-			// 返信本文のテキストを取得（コメントと違い専用のspanクラスがないので追加推奨）
-			const currentText = replyEl.querySelector('.reply-text').textContent;
+			if (!replyEl) {
+				console.warn(`reply-id ${replyId} の要素が見つかりません`);
+				return;
+			}
 
-			document.getElementById('modalReply').value = currentText;
-			document.getElementById('replyModalMessage').textContent = "";
+			// 本文を差し替え
+			const textEl = replyEl.querySelector('.reply-text');
+			textEl.textContent = data.replyComment;
 
-			// モーダルのタイトル・ボタン文言を編集用に変更
-			document.getElementById('replyModalLabel').textContent = "返信編集"; // ※replyModalにIDがあれば
-			document.getElementById('submitModalReply').textContent = "更新";
-
-			// modeとIDをdatasetに保存
-			document.getElementById('submitModalReply').dataset.mode = 'edit';
-			document.getElementById('submitModalReply').dataset.replyId = replyId;
-
-			const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('replyModal'));
-			modal.show();
-		});
+			// 日時を更新
+			const dateEl = replyEl.querySelector('.reply-datetime');
+			dateEl.innerHTML = data.updatedAt
+				? `${formatDateTime(data.updatedAt)} <span class="badge bg-secondary">編集済み</span>`
+				: formatDateTime(data.createdAt);
+		}
 
 		// 返信をDOMに追加
 		function appendReply(commentId, reply) {
@@ -497,20 +515,22 @@
 
 			// 返信HTMLを生成して追加
 			const replyDiv = document.createElement('div');
-			replyDiv.className = 'ms-4 mt-2 border-start ps-3';
+			replyDiv.className = 'ms-4 mt-2 border-start ps-3 reply-item';
 			replyDiv.dataset.replyId = reply.id;
 			replyDiv.innerHTML = `
-		        <strong>${reply.userSummary.username}</strong>
-		        <br><span class="reply-text">${reply.replyComment}</span>
-		        <br><small class="reply-datetime">${formatDateTime(reply.createdAt)}</small>
-		        ${reply.editable ? `
-		        <br><button
-		            type="button"
-		            class="btn btn-outline-warning btn-sm edit-raply-btn mt-1"
-		            data-reply-id="${reply.id}">
-		            <i class="bi bi-pencil-square"></i> 編集
-		        </button>` : ''}
-		    `;
+			    <strong>${reply.userSummary.username}</strong>
+			    <br><span class="reply-text">${reply.replyComment}</span>
+			    <br><small class="reply-datetime">${formatDateTime(reply.createdAt)}</small>
+			    ${reply.editable ? `
+			    <br><button
+			        type="button"
+			        class="btn btn-outline-warning btn-sm edit-reply-btn mt-1"
+			        data-reply-id="${reply.id}"
+			        data-bs-toggle="modal"
+			        data-bs-target="#replyModal">
+			        <i class="bi bi-pencil-square"></i> 編集
+			    </button>` : ''}
+			`;
 			replyContainer.appendChild(replyDiv);
 
 			// 返信一覧を開く
@@ -553,22 +573,6 @@
 				//2. サーバーから返ってきた最新のステータスを取得
 				const data = await response.json();
 
-				//デバック
-				console.log('レスポンス:', data);
-				console.log('ボタンの現在のクラス:', btnElement.className);
-
-				if (data.liked) {
-					console.log('いいね ON → btn-primary に変更');
-					btnElement.classList.remove('btn-outline-primary');
-					btnElement.classList.add('btn-primary');
-				} else {
-					console.log('いいね OFF → btn-outline-primary に変更');
-					btnElement.classList.remove('btn-primary');
-					btnElement.classList.add('btn-outline-primary');
-				}
-
-				console.log('変更後のクラス:', btnElement.className);
-
 				//3. UIのトグル処理
 				//いいね数の表示位置の指定のない場合の処理
 				const countSpan = btnElement.querySelector('.like-count');
@@ -592,23 +596,6 @@
 				btnElement.disabled = false;
 			}
 		}
-
-		// ✅ いいねボタンのトグル処理（イベント委譲）
-		document.getElementById('commentList').addEventListener('click', (e) => {
-			// クリックされた要素の近くに「いいねボタン」があるか判定
-			const btn = e.target.closest('.like-toggle-btn');
-
-			if (btn) {
-				// ボタンの親（comment-item）からIDを取得
-				const commentItem = btn.closest('.comment-item');
-				const commentId = commentItem.dataset.commentId;
-
-				// 以前作成した toggleStatus 関数を呼び出す
-				// btn を引数に渡すことで、関数内でボタンの色を変えられるようになります
-				toggleStatus(commentId, btn);
-			}
-		});
-
 	</script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

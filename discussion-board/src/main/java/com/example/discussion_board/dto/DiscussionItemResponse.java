@@ -24,7 +24,8 @@ public class DiscussionItemResponse {
 	//いいねDTO
 	private LikeResultResponse likeResult;
 	//編集ボタン表示用のflagフィールド
-	private boolean editable;
+	@Builder.Default
+	private boolean editable = false;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	

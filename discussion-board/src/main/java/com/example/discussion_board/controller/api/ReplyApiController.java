@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,9 +47,9 @@ public class ReplyApiController {
 		        .body(response);
 	}
 	
-	@PostMapping("/{replyId}")
+	@PutMapping("/{replyId}")
 	public ResponseEntity<ReplyResponse> editReply(@PathVariable Long replyId, @RequestBody ReplyRequest request) {
-		ReplyResponse response = replyService.updateReply(replyId, request);
+		ReplyResponse response = replyService.editReply(replyId, request);
 		
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(response);

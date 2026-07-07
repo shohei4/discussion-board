@@ -12,6 +12,6 @@ public interface ReplyService {
 	
 	public ReplyResponse saveReply(ReplyRequest request,User user,Long comnetId);
 	
-	public ReplyResponse updateReply(Long replyId, ReplyRequest request);
+	public ReplyResponse editReply(Long replyId, ReplyRequest request);
 	
 } 

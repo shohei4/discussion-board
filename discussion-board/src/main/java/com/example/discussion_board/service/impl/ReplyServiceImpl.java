@@ -44,18 +44,23 @@ public class ReplyServiceImpl implements ReplyService {
 		Reply reply = mapper.toEntity(request, user, discussionItem);
 		replyRepository.save(reply);
 		ReplyResponse response = mapper.toResponse(reply);
+		response.setEditable(true);
 		return response;
 	}
 	@Override
-	public ReplyResponse updateReply(Long replyId, ReplyRequest request) {
+	public ReplyResponse editReply(Long replyId, ReplyRequest request) {
 		// TODO 自動生成されたメソッド・スタブ
 		Reply reply = replyRepository.findById(replyId)
 				.orElseThrow(() -> new RuntimeException("返信コメントが見つかりません"));
 		
 		reply.setReplyComment(request.getReplyComment());
 		
-		replyRepository.save(reply);
-		return mapper.toResponse(reply);
+		replyRepository.saveAndFlush(reply);
+		
+		ReplyResponse response = mapper.toResponse(reply);
+		
+		response.setEditable(true);
+		return response;
 	}
 	
 	
