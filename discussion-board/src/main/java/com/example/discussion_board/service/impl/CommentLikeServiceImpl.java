@@ -10,7 +10,7 @@ import com.example.discussion_board.entity.User;
 import com.example.discussion_board.repository.CommentLikeRepository;
 import com.example.discussion_board.repository.DiscussionItemRepository;
 import com.example.discussion_board.repository.UserRepository;
-import com.example.discussion_board.service.CommentLikeService;
+import com.example.discussion_board.service.LikeService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CommentLikeServiceImpl implements CommentLikeService {
+public class CommentLikeServiceImpl implements LikeService {
 
 	private final CommentLikeRepository repository;
 	private final UserRepository userRepository;
