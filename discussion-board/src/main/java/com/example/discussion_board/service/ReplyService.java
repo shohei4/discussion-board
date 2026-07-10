@@ -8,9 +8,9 @@ import com.example.discussion_board.entity.User;
 
 public interface ReplyService {
 	
-	public List<ReplyResponse> findAllReply(Long id);
+	public List<ReplyResponse> findAllReply(Long id, Long userId);
 	
-	public ReplyResponse saveReply(ReplyRequest request,User user,Long comnetId);
+	public ReplyResponse saveReply(ReplyRequest request,User user,Long discussionItemId);
 	
 	public ReplyResponse editReply(Long replyId, ReplyRequest request);
 	

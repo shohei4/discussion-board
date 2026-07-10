@@ -2,18 +2,14 @@ package com.example.discussion_board.service.impl;
 
 import java.util.List;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.discussion_board.dto.DiscussionItemRequest;
 import com.example.discussion_board.dto.DiscussionItemResponse;
 import com.example.discussion_board.dto.DiscussionItemWithReplyResponse;
-import com.example.discussion_board.dto.GidaiSummary;
 import com.example.discussion_board.dto.LikeResultResponse;
 import com.example.discussion_board.dto.ReplyResponse;
-import com.example.discussion_board.dto.UserSummary;
 import com.example.discussion_board.entity.DiscussionItem;
 import com.example.discussion_board.entity.Gidai;
 import com.example.discussion_board.entity.User;
@@ -21,10 +17,9 @@ import com.example.discussion_board.mapper.DiscussionItemMapper;
 import com.example.discussion_board.mapper.ReplyMapper;
 import com.example.discussion_board.repository.DiscussionItemRepository;
 import com.example.discussion_board.repository.GidaiRepository;
-import com.example.discussion_board.security.CustomUserDetails;
-import com.example.discussion_board.service.CommentLikeService;
 import com.example.discussion_board.service.CurrentUserService;
 import com.example.discussion_board.service.DiscussionItemService;
+import com.example.discussion_board.service.LikeService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -37,12 +32,13 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 	private final DiscussionItemRepository discussionItemRepository;
 	private final GidaiRepository gidaiRepository;
 	private final DiscussionItemMapper discussionItemMapper;
-	private final CommentLikeService commentLikeService;
+	private final LikeService commentLikeService;
+	private final LikeService replyLikeService;
 	private final ReplyMapper replyMapper;
 	private final CurrentUserService currentUserService;
 	
 	@Override
-	public List<DiscussionItemWithReplyResponse> findAllByGidaiId(Long gidaiId) {
+	public List<DiscussionItemWithReplyResponse> findAllByGidaiId(Long gidaiId, Long userId) {
 		// TODO 自動生成されたメソッド・スタブ
 		
 		//議論コメントレスポンスのビルド
@@ -51,15 +47,12 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 					.stream()
 					.map((DiscussionItem item) -> {
 						//編集flag状態を取得
-						Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 						boolean editable = currentUserService.isOwner(item.getUser().getId());
 						
 						//いいねカウントの取得
 						Long likeCount = commentLikeService.conuntLikes(item.getId());
 						//いいね状態の取得
-						//Authenticationから現在のlog inユーザの詳細を取得
-						CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-						Boolean isLiked = commentLikeService.getIsLiked(item.getId(), userDetails.getId());
+						Boolean isLiked = commentLikeService.getIsLiked(item.getId(), userId);
 						LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
 						
 						List<ReplyResponse> replies = item.getReplies()
@@ -67,37 +60,51 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 						        .map(reply -> {
 						            ReplyResponse response = replyMapper.toResponse(reply); // ①の変換
 						            response.setEditable(currentUserService.isOwner(reply.getUser().getId())); // ②のeditable設定
+						            //いいね情報の取得
+						            Long replyLikeCount = replyLikeService.conuntLikes(reply.getId());
+						            Boolean replyIsLiked = replyLikeService.getIsLiked(reply.getId(), userId);
+						            LikeResultResponse replyLikeResult = new LikeResultResponse(replyLikeCount, replyIsLiked);
+						            response.setLikeResult(replyLikeResult);
 						            return response;
 						        })
 						        .toList();
 						
-						
-						DiscussionItemWithReplyResponse response =
-						        DiscussionItemWithReplyResponse.builder()
-						            .id(item.getId())
-						            .comment(item.getComment())
-						            .userSummary(UserSummary.from(item.getUser()))
-						            .gidaiSummary(GidaiSummary.from(item.getGidai()))
-						            .createdAt(item.getCreatedAt())
-						            .updatedAt(item.getUpdatedAt())
-						            .replies(replies)
-						            .likeResult(likeResult)
-						            .editable(editable)
-						            .build();
-						return response;
+						return discussionItemMapper.toResponseWithReplies(item, replies, likeResult, editable);
 					})
 					.toList();
 		return responses;
 	}
 	
 	@Override
-	public DiscussionItemResponse findById(Long discussionItemId) {
+	public DiscussionItemWithReplyResponse findById(Long discussionItemId, Long userId) {
 		// TODO 自動生成されたメソッド・スタブ
-		DiscussionItem discussionItem = discussionItemRepository.findById(discussionItemId)
+		DiscussionItem item = discussionItemRepository.findById(discussionItemId)
 				.orElseThrow(() -> new EntityNotFoundException("議論コメントが見つかりません"));
 		
-		DiscussionItemResponse response = discussionItemMapper.toResponse(discussionItem);
-		return response;
+		Boolean editable = currentUserService.isOwner(item.getUser().getId());
+		//いいねカウントの取得
+		Long likeCount = commentLikeService.conuntLikes(item.getId());
+		//いいね状態の取得
+		Boolean isLiked = commentLikeService.getIsLiked(item.getId(), userId);
+		LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
+		
+		
+		//返信情報取得
+		List<ReplyResponse> replies = item.getReplies()
+		        .stream()
+		        .map(reply -> {
+		            ReplyResponse replyResponse = replyMapper.toResponse(reply); // ①の変換
+		            replyResponse.setEditable(currentUserService.isOwner(reply.getUser().getId())); // ②のeditable設定
+		            //いいね情報の取得
+		            Long replyLikeCount = replyLikeService.conuntLikes(reply.getId());
+		            Boolean replyIsLiked = replyLikeService.getIsLiked(reply.getId(), userId);
+		            LikeResultResponse replyLikeResult = new LikeResultResponse(replyLikeCount, replyIsLiked);
+		            replyResponse.setLikeResult(replyLikeResult);
+		            return replyResponse;
+		        })
+		        .toList();
+		
+		return discussionItemMapper.toResponseWithReplies(item, replies, likeResult, editable);
 	}
 
 	
@@ -107,18 +114,19 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 		Gidai gidai = gidaiRepository.findById(gidaiId)
 				.orElseThrow(() -> new IllegalArgumentException(
 		                "指定された議題IDが存在しません: " + gidaiId));
-		DiscussionItem discussionItem = DiscussionItem.builder()
+		DiscussionItem item = DiscussionItem.builder()
 		.comment(request.getComment())
 		.gidai(gidai)
 		.user(user)
 		.build();
-		discussionItemRepository.save(discussionItem);
+		discussionItemRepository.save(item);
+		
 		//いいねカウントの取得
-		Long likeCount = commentLikeService.conuntLikes(discussionItem.getId());
+		Long likeCount = commentLikeService.conuntLikes(item.getId());
 		//いいね状態の取得
-		boolean isLiked = commentLikeService.getIsLiked(discussionItem.getId(), user.getId());
+		boolean isLiked = commentLikeService.getIsLiked(item.getId(), user.getId());
 		LikeResultResponse likeResult = new LikeResultResponse(likeCount, isLiked);
-		DiscussionItemResponse response = discussionItemMapper.toResponse(discussionItem, likeResult, true);
+		DiscussionItemResponse response = discussionItemMapper.toResponse(item, likeResult, true);
 		return response;
 	}
 
@@ -136,6 +144,7 @@ public class DiscussionItemServiceImpl implements DiscussionItemService {
 		
 		//DTOに変換
 		DiscussionItemResponse response = discussionItemMapper.toResponse(saved);
+		response.setEditable(true);
 		return response;
 	}
 

@@ -32,8 +32,10 @@ public class DiscussionApiController {
 	private final UserService userService;
 	
 	@GetMapping("/list/{gidaiId}")
-	public ResponseEntity<List<DiscussionItemWithReplyResponse>> getAll(@PathVariable Long gidaiId) {
-		List<DiscussionItemWithReplyResponse> responses = discussionItemService.findAllByGidaiId(gidaiId);
+	public ResponseEntity<List<DiscussionItemWithReplyResponse>> getAll(@PathVariable Long gidaiId,
+			@AuthenticationPrincipal CustomUserDetails customUser) {
+		Long userId = customUser.getId();
+		List<DiscussionItemWithReplyResponse> responses = discussionItemService.findAllByGidaiId(gidaiId, userId);
 		return ResponseEntity.ok(responses);
 	}
 	

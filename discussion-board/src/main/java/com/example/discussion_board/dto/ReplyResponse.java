@@ -26,6 +26,8 @@ public class ReplyResponse {
 	@Builder.Default
 	private boolean editable = false;
 	
+	private LikeResultResponse likeResult;
+	
 	private LocalDateTime createdAt;
 	
 	private LocalDateTime updatedAt;

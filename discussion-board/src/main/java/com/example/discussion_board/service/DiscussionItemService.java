@@ -12,9 +12,9 @@ public interface DiscussionItemService {
 	 * 特定議題の議論コメントを全件取得
 	 * @return　レスポンスDTO
 	 */
-	List<DiscussionItemWithReplyResponse> findAllByGidaiId(Long gidaiId); 
+	List<DiscussionItemWithReplyResponse> findAllByGidaiId(Long gidaiId, Long userId); 
 	
-	DiscussionItemResponse findById(Long discussionItemId);
+	DiscussionItemWithReplyResponse findById(Long discussionItemId, Long userId);
 	
 	/**
 	 * 議論コメントを登録

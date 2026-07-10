@@ -15,7 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-@Service
+@Service("replyLikeService")
 @RequiredArgsConstructor
 @Transactional
 public class ReplyLikeServiceImpl implements LikeService{

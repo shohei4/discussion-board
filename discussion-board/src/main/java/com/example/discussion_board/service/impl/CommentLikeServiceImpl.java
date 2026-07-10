@@ -15,7 +15,7 @@ import com.example.discussion_board.service.LikeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
-@Service
+@Service("commentLikeService")
 @Transactional
 @RequiredArgsConstructor
 public class CommentLikeServiceImpl implements LikeService {

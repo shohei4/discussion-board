@@ -1,5 +1,6 @@
 package com.example.discussion_board.controller.api;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.discussion_board.dto.LikeResultResponse;
 import com.example.discussion_board.security.CustomUserDetails;
-import com.example.discussion_board.service.CommentLikeService;
+import com.example.discussion_board.service.LikeService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,8 +20,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/like")
 @RequiredArgsConstructor
 public class CommentLikeApiContorller {
-
-	private final CommentLikeService commentLikeService;
+	
+	@Qualifier("commentLikeService")
+	private final LikeService commentLikeService;
 
 	@PostMapping("/toggle/{commentId}")
 	public ResponseEntity<LikeResultResponse> toggleLike(@PathVariable Long commentId,

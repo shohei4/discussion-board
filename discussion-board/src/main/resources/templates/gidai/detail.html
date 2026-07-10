@@ -170,28 +170,40 @@
 			const replies = item.replies ?? [];
 
 			const repliesHTML = replies
-				.map(reply => `
-				<div class="ms-4 mt-2 border-start ps-3 reply-item" data-reply-id="${reply.id}">
+				.map(reply => {
+					//いいね状態を取得
+					const isReplyLiked = reply.likeResult?.liked ?? false;
+					const replyLikeCount = reply.likeResult?.likeCount ?? 0;
+					const replyBtnClass = isReplyLiked ? 'btn-primary' : 'btn-outline-primary';
+
+					return `
+					<div class="ms-4 mt-2 border-start ps-3 reply-item" data-reply-id="${reply.id}">
 				            <strong>${reply.userSummary.username}</strong>
 				            <br><span class="reply-text">${reply.replyComment}</span>
 				            <br>
 				            <small class="reply-datetime">${reply.updatedAt
-						? formatDateTime(reply.updatedAt) + ' <span class="badge bg-secondary">編集済み</span>'
-						: formatDateTime(reply.createdAt)}
+							? formatDateTime(reply.updatedAt) + ' <span class="badge bg-secondary">編集済み</span>'
+							: formatDateTime(reply.createdAt)}
 				            </small>
-				            ${reply.editable ? `
-				            <br><button
-				                type="button"
-				                class="btn btn-outline-warning btn-sm edit-reply-btn mt-1"
-				                data-reply-id="${reply.id}"
-								data-bs-toggle="modal"
-								data-bs-target="#replyModal"
-								>
-				                <i class="bi bi-pencil-square"></i> 編集
-				            </button>` : ''}
-				        </div>
-				        `
-				)
+							
+							
+							<div class="d-flex gap-2 align-items-center mt-1">
+							               <button class="reply-like-toggle-btn btn btn-sm ${replyBtnClass}">
+							                   👍 いいね <span class="like-count">${replyLikeCount}</span>
+							               </button>
+							               ${reply.editable ? `
+							               <button
+							                   type="button"
+							                   class="btn btn-outline-warning btn-sm edit-reply-btn"
+							                   data-reply-id="${reply.id}"
+							                   data-bs-toggle="modal"
+							                   data-bs-target="#replyModal">
+							                   <i class="bi bi-pencil-square"></i> 編集
+							               </button>` : ''}
+							</div>
+				  	</div>
+				   	`
+				})
 				.join('');
 
 			// ★ 返信件数に応じてボタンを出し分け
@@ -374,6 +386,9 @@
 
 			const editReplyBtn = e.target.closest('.edit-reply-btn');
 			if (editReplyBtn) return handleEditReplyButtonClick(editReplyBtn);
+
+			const replyLikeBtn = e.target.closest('.reply-like-toggle-btn');
+			if (replyLikeBtn) return handleReplyLikeButtonClick(replyLikeBtn);
 		});
 
 		//コメント編集ボタン押下時の関数
@@ -395,10 +410,10 @@
 		//コメントいいねボタン押下時の関数
 		// いいねボタン押下時の処理
 		function handleLikeButtonClick(btn) {
-		    const commentItem = btn.closest('.comment-item');
-		    const commentId = commentItem.dataset.commentId;
-		
-		    toggleStatus(commentId, btn);
+			const commentItem = btn.closest('.comment-item');
+			const commentId = commentItem.dataset.commentId;
+
+			toggleStatus(commentId, btn);
 		}
 		//返信ボタン押下時の関数
 		function handleReplyButtonClick(btn) {
@@ -513,6 +528,11 @@
 			const replyContainer = commentDiv.querySelector('.reply-container');
 			const toggleBtn = commentDiv.querySelector('.toggle-replies-btn');
 
+			//いいね状態の取得
+			const isReplyLiked = reply.likeResult?.liked ?? false;
+			const replyLikeCount = reply.likeResult?.likeCount ?? 0;
+			const replyBtnClass = isReplyLiked ? 'btn-primary' : 'btn-outline-primary';
+
 			// 返信HTMLを生成して追加
 			const replyDiv = document.createElement('div');
 			replyDiv.className = 'ms-4 mt-2 border-start ps-3 reply-item';
@@ -521,15 +541,20 @@
 			    <strong>${reply.userSummary.username}</strong>
 			    <br><span class="reply-text">${reply.replyComment}</span>
 			    <br><small class="reply-datetime">${formatDateTime(reply.createdAt)}</small>
-			    ${reply.editable ? `
-			    <br><button
-			        type="button"
-			        class="btn btn-outline-warning btn-sm edit-reply-btn mt-1"
-			        data-reply-id="${reply.id}"
-			        data-bs-toggle="modal"
-			        data-bs-target="#replyModal">
-			        <i class="bi bi-pencil-square"></i> 編集
-			    </button>` : ''}
+				<div class="d-flex gap-2 align-items-center mt-1">
+				            <button class="reply-like-toggle-btn btn btn-sm ${replyBtnClass}">
+				                👍 いいね <span class="like-count">${replyLikeCount}</span>
+				            </button>
+				            ${reply.editable ? `
+				            <button
+				                type="button"
+				                class="btn btn-outline-warning btn-sm edit-reply-btn"
+				                data-reply-id="${reply.id}"
+				                data-bs-toggle="modal"
+				                data-bs-target="#replyModal">
+				                <i class="bi bi-pencil-square"></i> 編集
+				            </button>` : ''}
+				        </div>
 			`;
 			replyContainer.appendChild(replyDiv);
 
@@ -596,9 +621,54 @@
 				btnElement.disabled = false;
 			}
 		}
+
+		//返信いいねボタン押下時の関数
+		function handleReplyLikeButtonClick(btn) {
+			const replyItem = btn.closest('.reply-item');
+			const replyId = replyItem.dataset.replyId;
+
+			toggleReplyStatus(replyId, btn);
+		}
+		//返信いいねトグル処理関数
+		async function toggleReplyStatus(replyId, btnElement) {
+			//二重クリック防止
+			btnElement.disabled = true;
+
+			try {
+				//1. APIリクエスト(返信用のエンドポイント)
+				const response = await authenticatedFetch(`/api/reply-like/toggle/${replyId}`, {
+					method: "POST"
+				});
+				if (!response.ok) throw new Error('処理に失敗しました');
+
+				//2. サーバーから返ってきた最新のステータスを取得
+				const data = await response.json();
+
+				//3. UIのトグル処理
+				const countSpan = btnElement.querySelector('.like-count');
+				if (countSpan && data.likeCount !== undefined) {
+					countSpan.innerText = data.likeCount;
+				}
+
+				if (data.liked) {
+					btnElement.classList.remove('btn-outline-primary');
+					btnElement.classList.add('btn-primary');
+				} else {
+					btnElement.classList.remove('btn-primary');
+					btnElement.classList.add('btn-outline-primary');
+				}
+
+			} catch (error) {
+				console.error('Error:', error);
+				alert('ログインが必要か、通信エラーが発生しました。');
+			} finally {
+				//4. ボタンの再度有効化
+				btnElement.disabled = false;
+			}
+		}
 	</script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 
-</html>
+</html> 
